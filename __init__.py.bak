@@ -1,0 +1,53 @@
+from flask import Flask, redirect, url_for
+from flask_login import LoginManager
+from flask_mail import Mail
+from flask_migrate import Migrate
+from config import config
+from app.extensions import db, login_manager, mail, migrate
+
+def create_app(config_name='default'):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+    
+    # Initialize extensions
+    db.init_app(app)
+    login_manager.init_app(app)
+    mail.init_app(app)
+    migrate.init_app(app, db)
+    
+    # Import models
+    from app.models.user import User
+    
+    # User loader for Flask-Login
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+    
+    # Create tables if they don't exist
+    with app.app_context():
+        db.create_all()
+    
+    # Register blueprints
+    from app.auth import auth_bp
+    from app.officers import officers_bp
+    from app.reports import reports_bp
+    from app.assessments import assessments_bp
+    from app.countersign import countersign_bp
+    from app.hr import hr_bp
+    from app.admin import admin_bp
+    from app.api import api_bp
+    
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(officers_bp, url_prefix='/officers')
+    app.register_blueprint(reports_bp, url_prefix='/reports')
+    app.register_blueprint(assessments_bp, url_prefix='/assessments')
+    app.register_blueprint(countersign_bp, url_prefix='/countersign')
+    app.register_blueprint(hr_bp, url_prefix='/hr')
+    app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(api_bp, url_prefix='/api')
+    
+    @app.route('/')
+    def index():
+        return redirect(url_for('auth.login'))
+    
+    return app

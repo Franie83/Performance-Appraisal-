@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h4><i class="fas fa-user-edit"></i> Edit User: {{ user.username }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <h5 class="mb-3">Basic Information</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Username *</label>
+                                <input type="text" name="username" class="form-control" value="{{ user.username }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Email *</label>
+                                <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label>New Password (leave blank to keep current)</label>
+                            <input type="password" name="password" class="form-control" placeholder="Enter new password to change">
+                        </div>
+                        <div class="mb-3">
+                            <label>Role *</label>
+                            <select name="role" class="form-select" required>
+                                <option value="OFFICER" {% if user.role == 'OFFICER' %}selected{% endif %}>Officer</option>
+                                <option value="REPORTING_OFFICER" {% if user.role == 'REPORTING_OFFICER' %}selected{% endif %}>Reporting Officer</option>
+                                <option value="COUNTERSIGNING_OFFICER" {% if user.role == 'COUNTERSIGNING_OFFICER' %}selected{% endif %}>Countersigning Officer</option>
+                                <option value="PERMANENT_SECRETARY" {% if user.role == 'PERMANENT_SECRETARY' %}selected{% endif %}>Permanent Secretary</option>
+                                <option value="HR" {% if user.role == 'HR' %}selected{% endif %}>HR Officer</option>
+                                <option value="ADMIN" {% if user.role == 'ADMIN' %}selected{% endif %}>Administrator</option>
+                            </select>
+                        </div>
+                        
+                        <hr>
+                        <h5 class="mb-3">Personal Information</h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label>Surname</label>
+                                <input type="text" name="surname" class="form-control" value="{{ user.surname or '' }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>First Name</label>
+                                <input type="text" name="first_name" class="form-control" value="{{ user.first_name or '' }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Other Names</label>
+                                <input type="text" name="other_names" class="form-control" value="{{ user.other_names or '' }}">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Title</label>
+                                <select name="title" class="form-select">
+                                    <option value="">Select Title</option>
+                                    <option value="Mr" {% if user.title == 'Mr' %}selected{% endif %}>Mr</option>
+                                    <option value="Mrs" {% if user.title == 'Mrs' %}selected{% endif %}>Mrs</option>
+                                    <option value="Ms" {% if user.title == 'Ms' %}selected{% endif %}>Ms</option>
+                                    <option value="Dr" {% if user.title == 'Dr' %}selected{% endif %}>Dr</option>
+                                    <option value="Prof" {% if user.title == 'Prof' %}selected{% endif %}>Prof</option>
+                                    <option value="Engr" {% if user.title == 'Engr' %}selected{% endif %}>Engr</option>
+                                    <option value="Hon" {% if user.title == 'Hon' %}selected{% endif %}>Hon</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Staff Number</label>
+                                <input type="text" name="staff_no" class="form-control" value="{{ user.staff_no or '' }}">
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        <h5 class="mb-3">Organizational Information</h5>
+                        <div class="mb-3">
+                            <label>Ministry / MDA</label>
+                            <input type="text" name="ministry" class="form-control" value="{{ user.ministry or '' }}" placeholder="e.g., Ministry of Finance">
+                            <small class="text-muted">The Ministry or MDA the user belongs to</small>
+                        </div>
+                        <div class="mb-3">
+                            <label>Department</label>
+                            <input type="text" name="department" class="form-control" value="{{ user.department or '' }}" placeholder="e.g., ICT Department">
+                            <small class="text-muted">The Department within the Ministry</small>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label>Division</label>
+                                <input type="text" name="division" class="form-control" value="{{ user.division or '' }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Branch</label>
+                                <input type="text" name="branch" class="form-control" value="{{ user.branch or '' }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label>Section</label>
+                                <input type="text" name="section" class="form-control" value="{{ user.section or '' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input type="checkbox" name="is_active" class="form-check-input" id="isActive" value="1" {% if user.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="isActive">
+                                Active Account
+                            </label>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <a href="{{ url_for('quarterly.admin_manage_users') }}" class="btn btn-secondary btn-lg px-4">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

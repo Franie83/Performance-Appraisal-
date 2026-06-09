@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h4><i class="fas fa-plus-circle"></i> Create Appraisal For Any User</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label>Select Officer *</label>
+                            <select name="user_id" class="form-select" required>
+                                <option value="">-- Select Officer --</option>
+                                {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>Appraisal Year *</label>
+                            <input type="number" name="appraisal_year" class="form-control" value="2026" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Initial Status</label>
+                            <select name="status" class="form-select">
+                                <option value="DRAFT">Draft</option>
+                                <option value="SUBMITTED">Submitted</option>
+                            </select>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success">Create Appraisal</button>
+                            <a href="{{ url_for('quarterly.admin_manage_appraisals') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

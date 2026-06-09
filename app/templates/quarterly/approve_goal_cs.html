@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4>Countersigning Officer - Final Goal Approval</h4>
+                    <p class="mb-0">Officer: {{ goal.user.full_name or goal.user.username }} | Quarter {{ goal.quarter }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Goal:</strong><br>
+                        {{ goal.goal_description }}
+                        <hr>
+                        <strong>Success Criteria:</strong><br>
+                        {{ goal.success_criteria }}
+                        <hr>
+                        <strong>Reporting Officer's Comments:</strong><br>
+                        {{ goal.plan_modifications or 'No comments' }}
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="form-group mb-3">
+                            <label>Countersigning Officer's Comments</label>
+                            <textarea name="cs_comments" class="form-control" rows="3" placeholder="Add your comments..."></textarea>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" name="action" value="approve" class="btn btn-success btn-lg" onclick="return confirm('Final approve this goal?')">
+                                <i class="fas fa-check-circle"></i> Final Approve
+                            </button>
+                            <button type="submit" name="action" value="return" class="btn btn-warning btn-lg" onclick="return confirm('Return this goal to Reporting Officer?')">
+                                <i class="fas fa-undo"></i> Return to RO
+                            </button>
+                            <a href="{{ url_for('quarterly.dashboard') }}" class="btn btn-secondary btn-lg">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h4><i class="fas fa-edit"></i> Edit Goal</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label>Goal Description</label>
+                            <textarea name="goal_description" class="form-control" rows="3" required>{{ goal.goal_description }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label>Quarter</label>
+                            <select name="quarter" class="form-select" required>
+                                <option value="1" {% if goal.quarter == 1 %}selected{% endif %}>Quarter 1</option>
+                                <option value="2" {% if goal.quarter == 2 %}selected{% endif %}>Quarter 2</option>
+                                <option value="3" {% if goal.quarter == 3 %}selected{% endif %}>Quarter 3</option>
+                                <option value="4" {% if goal.quarter == 4 %}selected{% endif %}>Quarter 4</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>Priority (1-5)</label>
+                            <input type="number" name="priority" class="form-control" value="{{ goal.priority }}" min="1" max="5">
+                        </div>
+                        <div class="mb-3">
+                            <label>Success Criteria</label>
+                            <textarea name="success_criteria" class="form-control" rows="2">{{ goal.success_criteria or '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label>Plan Status</label>
+                            <select name="plan_status" class="form-select">
+                                <option value="DRAFT" {% if goal.plan_status == 'DRAFT' %}selected{% endif %}>Draft</option>
+                                <option value="SUBMITTED" {% if goal.plan_status == 'SUBMITTED' %}selected{% endif %}>Submitted</option>
+                                <option value="PENDING_CS_APPROVAL" {% if goal.plan_status == 'PENDING_CS_APPROVAL' %}selected{% endif %}>Pending CS Approval</option>
+                                <option value="APPROVED" {% if goal.plan_status == 'APPROVED' %}selected{% endif %}>Approved</option>
+                                <option value="MODIFIED" {% if goal.plan_status == 'MODIFIED' %}selected{% endif %}>Modified</option>
+                            </select>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a href="{{ url_for('quarterly.admin_manage_goals') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

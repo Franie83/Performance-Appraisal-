@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="fas fa-clipboard-list"></i> Quarter {{ quarter }} Performance Review</h4>
+                    <small>Report on your achievements and challenges</small>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <!-- Permanent Tips Box -->
+                        <div class="alert alert-info mb-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-info-circle fa-2x me-2 text-primary"></i>
+                                <strong class="fs-5">Review Guidelines:</strong>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <strong>✅ Achievements:</strong>
+                                        <div class="small text-muted">List specific accomplishments, completed tasks, and milestones achieved.</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>⚠️ Challenges:</strong>
+                                        <div class="small text-muted">Describe obstacles faced, resource constraints, or unexpected difficulties.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <strong>📊 Success/Failure Reasons:</strong>
+                                        <div class="small text-muted">Explain what contributed to success or caused underperformance.</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>🔄 Recovery Plan:</strong>
+                                        <div class="small text-muted">If targets were not met, outline corrective actions and timeline.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2 p-2 bg-light rounded">
+                                <i class="fas fa-lightbulb text-warning"></i>
+                                <strong>Tip:</strong> Be honest and constructive. Focus on facts and provide specific examples.
+                            </div>
+                        </div>
+                        
+                        {% for goal in goals %}
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <strong>Goal {{ loop.index }}:</strong> {{ goal.goal_description }}
+                                {% if goal.priority %} <span class="badge bg-secondary">Priority {{ goal.priority }}</span>{% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Achievements</label>
+                                    <textarea name="achievements_{{ goal.id }}" class="form-control" rows="2" 
+                                        placeholder="What did you achieve this quarter? Be specific about milestones and results.">{{ goal.achievements or '' }}</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Challenges Faced</label>
+                                    <textarea name="challenges_{{ goal.id }}" class="form-control" rows="2" 
+                                        placeholder="What challenges did you encounter? Include obstacles, resource constraints, or unexpected issues.">{{ goal.challenges or '' }}</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Reasons for Failure/Success</label>
+                                    <textarea name="reasons_{{ goal.id }}" class="form-control" rows="2" 
+                                        placeholder="Explain reasons for success or failure - what worked well and what didn't?">{{ goal.reasons_for_failure or '' }}</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Recovery Plan (if underperformed)</label>
+                                    <textarea name="recovery_{{ goal.id }}" class="form-control" rows="2" 
+                                        placeholder="If targets were not met, what is your recovery plan? Include timeline and specific actions.">{{ goal.recovery_plan or '' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary px-4">Submit Review</button>
+                            <a href="{{ url_for('quarterly.dashboard') }}" class="btn btn-secondary px-4">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4><i class="fas fa-clipboard-list"></i> Quarter {{ goal.quarter }} Review Feedback</h4>
+                    <small>Year: {{ goal.planning_year }} | Status: {{ goal.review_status }}</small>
+                </div>
+                <div class="card-body">
+                    <!-- Goal Details - ALWAYS SHOW -->
+                    <div class="alert alert-secondary mb-4">
+                        <h6><i class="fas fa-bullseye"></i> Your Goal</h6>
+                        <hr>
+                        <p class="mb-2"><strong>Goal Description:</strong><br>{{ goal.goal_description }}</p>
+                        {% if goal.success_criteria %}
+                        <p class="mb-0"><strong>Success Criteria:</strong><br>{{ goal.success_criteria }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Officer's Self-Assessment -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning">
+                            <h6 class="mb-0"><i class="fas fa-user"></i> Your Achievements & Challenges</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <strong><i class="fas fa-trophy text-success"></i> Achievements:</strong>
+                                    <div class="border p-2 bg-light rounded mt-1">
+                                        {{ goal.achievements or 'Not provided' }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <strong><i class="fas fa-exclamation-triangle text-warning"></i> Challenges:</strong>
+                                    <div class="border p-2 bg-light rounded mt-1">
+                                        {{ goal.challenges or 'Not provided' }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <strong><i class="fas fa-question-circle text-info"></i> Reasons for Failure/Success:</strong>
+                                    <div class="border p-2 bg-light rounded mt-1">
+                                        {{ goal.reasons_for_failure or 'Not provided' }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <strong><i class="fas fa-chart-line text-primary"></i> Recovery Plan:</strong>
+                                    <div class="border p-2 bg-light rounded mt-1">
+                                        {{ goal.recovery_plan or 'Not provided' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Reporting Officer's Review -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0"><i class="fas fa-chalkboard-user"></i> Reporting Officer's Assessment</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong><i class="fas fa-comment"></i> Comments:</strong>
+                                <div class="border p-2 bg-light rounded mt-1">
+                                    {{ goal.reporting_officer_comments or 'No comments provided' }}
+                                </div>
+                            </div>
+                            {% if goal.further_directives %}
+                            <div class="mb-3">
+                                <strong><i class="fas fa-forward"></i> Further Directives:</strong>
+                                <div class="border p-2 bg-light rounded mt-1">
+                                    {{ goal.further_directives }}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if goal.quarter_2_adjustments %}
+                            <div class="mb-3">
+                                <strong><i class="fas fa-calendar-alt"></i> Next Quarter Adjustments:</strong>
+                                <div class="border p-2 bg-light rounded mt-1">
+                                    {{ goal.quarter_2_adjustments }}
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="mt-2">
+                                <strong>Reviewed by:</strong> {{ goal.review_completer.username if goal.review_completer else 'Not yet reviewed' }}
+                                {% if goal.review_completed_at %}
+                                <br><strong>Reviewed on:</strong> {{ goal.review_completed_at.strftime('%d %B %Y %H:%M') }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Countersigning Officer's Review -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="fas fa-user-tie"></i> Countersigning Officer's Remarks</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong><i class="fas fa-comment-dots"></i> Final Comments:</strong>
+                                <div class="border p-2 bg-light rounded mt-1">
+                                    {{ goal.cs_review_comments or 'No additional comments' }}
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <strong>Final Status:</strong>
+                                {% if goal.cs_review_approved %}
+                                    <span class="badge bg-success"><i class="fas fa-check-circle"></i> Approved by Countersigning Officer</span>
+                                {% else %}
+                                    <span class="badge bg-warning"><i class="fas fa-clock"></i> Pending CS Approval</span>
+                                {% endif %}
+                                {% if goal.cs_review_approved_at %}
+                                <br><strong>Approved on:</strong> {{ goal.cs_review_approved_at.strftime('%d %B %Y %H:%M') }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Review Status Summary -->
+                    <div class="alert alert-info">
+                        <strong><i class="fas fa-info-circle"></i> Review Status Summary:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>✅ Goal approved by Reporting Officer</li>
+                            <li>✅ Review submitted by Officer</li>
+                            <li>✅ Assessed by Reporting Officer</li>
+                            {% if goal.cs_review_approved %}
+                            <li>✅ Final approved by Countersigning Officer</li>
+                            {% else %}
+                            <li>⏳ Awaiting Countersigning Officer final approval</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('quarterly.dashboard') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .status-active { background: #28a745; color: white; }
+    .status-inactive { background: #dc3545; color: white; }
+    
+    .filter-section {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .table-actions {
+        white-space: nowrap;
+    }
+    
+    .btn-group-sm .btn {
+        margin: 0 2px;
+    }
+    
+    .btn-create {
+        background-color: #008751;
+        border-color: #008751;
+    }
+    
+    .btn-create:hover {
+        background-color: #00633E;
+        border-color: #00633E;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-users"></i> Manage Users</h4>
+                    <small>View, edit, and manage all system users</small>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Filter and Action Section -->
+                    <div class="filter-section">
+                        <div class="row align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label">Search</label>
+                                <input type="text" id="searchInput" class="form-control" placeholder="Username, email, name...">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Role Filter</label>
+                                <select id="roleFilter" class="form-select">
+                                    <option value="">All Roles</option>
+                                    <option value="ADMIN">Admin</option>
+                                    <option value="OFFICER">Officer</option>
+                                    <option value="REPORTING_OFFICER">Reporting Officer</option>
+                                    <option value="COUNTERSIGNING_OFFICER">Countersigning Officer</option>
+                                    <option value="HR">HR</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Status Filter</label>
+                                <select id="statusFilter" class="form-select">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">&nbsp;</label>
+                                <a href="{{ url_for('admin.create_user_page') }}" class="btn btn-create w-100 text-white">
+                                    <i class="fas fa-user-plus"></i> Create New User
+                                </a>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-info w-100" onclick="exportUsers()">
+                                    <i class="fas fa-download"></i> Export Users
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Users Table -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead class="table-success">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Full Name</th>
+                                    <th>Staff No</th>
+                                    <th>Role</th>
+                                    <th>Department</th>
+                                    <th>Ministry</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                {% for user in users %}
+                                <tr data-user-id="{{ user.id }}">
+                                    <td>{{ user.id }}</a>
+                                    <td>{{ user.username }}</a>
+                                    <td>{{ user.email }}</a>
+                                    <td>{{ user.full_name or '-' }}</a>
+                                    <td>{{ user.staff_no or '-' }}</a>
+                                    <td><span class="badge bg-primary">{{ user.role }}</span></a>
+                                    <td>{{ user.department or '-' }}</a>
+                                    <td>{{ user.ministry or '-' }}</a>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="status-badge status-active">Active</span>
+                                        {% else %}
+                                            <span class="status-badge status-inactive">Inactive</span>
+                                        {% endif %}
+                                    </a>
+                                    <td class="table-actions">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('admin.edit_user_page', user_id=user.id) }}" class="btn btn-info" title="Edit User">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-danger" onclick="deleteUser({{ user.id }})" title="Delete User">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </a>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Search and Filter Functions
+function filterTable() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const roleFilter = document.getElementById('roleFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    const rows = document.querySelectorAll('#usersTableBody tr');
+    
+    rows.forEach(row => {
+        const username = row.cells[1]?.innerText.toLowerCase() || '';
+        const email = row.cells[2]?.innerText.toLowerCase() || '';
+        const fullname = row.cells[3]?.innerText.toLowerCase() || '';
+        const staffno = row.cells[4]?.innerText.toLowerCase() || '';
+        const role = row.cells[5]?.innerText || '';
+        const status = row.cells[8]?.innerText || '';
+        
+        let matchesSearch = true;
+        if (searchTerm) {
+            matchesSearch = username.includes(searchTerm) || 
+                           email.includes(searchTerm) || 
+                           fullname.includes(searchTerm) || 
+                           staffno.includes(searchTerm);
+        }
+        
+        let matchesRole = true;
+        if (roleFilter) {
+            matchesRole = role.includes(roleFilter);
+        }
+        
+        let matchesStatus = true;
+        if (statusFilter === 'active') {
+            matchesStatus = status.includes('Active');
+        } else if (statusFilter === 'inactive') {
+            matchesStatus = status.includes('Inactive');
+        }
+        
+        if (matchesSearch && matchesRole && matchesStatus) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Event listeners for filters
+document.getElementById('searchInput')?.addEventListener('keyup', filterTable);
+document.getElementById('roleFilter')?.addEventListener('change', filterTable);
+document.getElementById('statusFilter')?.addEventListener('change', filterTable);
+
+// Delete User Function
+function deleteUser(userId) {
+    if (confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+        fetch("/admin/delete-user/" + userId, {
+            method: "DELETE",
+            headers: {"Content-Type": "application/json"}
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("User deleted successfully");
+                location.reload();
+            } else {
+                alert("Error: " + (data.message || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting user: ' + error.message);
+        });
+    }
+}
+
+// Export Users
+function exportUsers() {
+    window.location.href = "/admin/export-users";
+}
+</script>
+{% endblock %}

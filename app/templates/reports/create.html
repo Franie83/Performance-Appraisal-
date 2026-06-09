@@ -1,0 +1,529 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .section-card {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+        color: #003366;
+        border-bottom: 2px solid #003366;
+        padding-bottom: 8px;
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .section-title i {
+        margin-right: 8px;
+        color: #0d6efd;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: #495057;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.25);
+    }
+    
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .btn-primary {
+        background-color: #003366;
+        border-color: #003366;
+    }
+    
+    .btn-primary:hover {
+        background-color: #004c99;
+        border-color: #004c99;
+    }
+    
+    textarea.form-control {
+        resize: vertical;
+        min-height: 80px;
+    }
+    
+    @media (max-width: 768px) {
+        .section-card {
+            padding: 15px;
+        }
+        .btn-lg {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Create Performance Report - Gen 79A</h4>
+                    <small>Complete all sections of the official appraisal form</small>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="reportForm">
+                        <!-- Report Period -->
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Report Year *</label>
+                                <select name="report_year" class="form-select" required>
+                                    <option value="2024">2024</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2026" selected>2026</option>
+                                    <option value="2027">2027</option>
+                                    <option value="2028">2028</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Period From *</label>
+                                <input type="date" name="period_from" class="form-control" id="period_from" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Period To *</label>
+                                <input type="date" name="period_to" class="form-control" id="period_to" required>
+                            </div>
+                        </div>
+
+                        <!-- ============ PART ONE: PERSONAL PARTICULARS ============ -->
+                        <div class="section-card">
+                            <h5 class="section-title"><i class="fas fa-user"></i> PART ONE: Personal Particulars</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Date of Birth</label>
+                                    <input type="date" name="date_of_birth" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Date of First Appointment</label>
+                                    <input type="date" name="date_first_appointment" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Post Appointed To</label>
+                                    <input type="text" name="post_appointed" class="form-control" placeholder="e.g., CONF. SECRETARY">
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Present Post</label>
+                                    <input type="text" name="present_post" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Present Post Date</label>
+                                    <input type="date" name="present_post_date" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Salary Grade</label>
+                                    <input type="text" name="salary_grade" class="form-control" placeholder="e.g., GL 12">
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Educational Qualifications</label>
+                                    <textarea name="educational_qualifications" class="form-control" rows="3" placeholder="List all qualifications with dates..."></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Date Appointment Confirmed</label>
+                                    <input type="date" name="date_appointment_confirmed" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============ LEAVE INFORMATION ============ -->
+                        <div class="section-card">
+                            <h5 class="section-title"><i class="fas fa-calendar-alt"></i> Leave Information</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Sick Leave Days</label>
+                                    <input type="number" name="sick_leave_days" class="form-control" value="0">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Annual Leave Days</label>
+                                    <input type="number" name="annual_leave_days" class="form-control" value="0">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Casual Leave Days</label>
+                                    <input type="number" name="casual_leave_days" class="form-control" value="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============ SECTION 4: TARGET SETTING ============ -->
+                        <div class="section-card">
+                            <h5 class="section-title"><i class="fas fa-bullseye"></i> SECTION 4: Target Setting</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">4(A) Division/Branch/Section/Unit Targets</label>
+                                <textarea name="division_targets" class="form-control" rows="4" placeholder="List the targets set for your division/branch/section/unit..."></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">4(B) Appraiser Targets</label>
+                                <textarea name="appraiser_targets" class="form-control" rows="4" placeholder="List the targets set for you to achieve..."></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Estimated Salary Cost (₦)</label>
+                                    <input type="number" step="0.01" name="estimated_salary_cost" class="form-control" placeholder="0.00">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Estimated Overhead Cost (₦)</label>
+                                    <input type="number" step="0.01" name="estimated_overhead_cost" class="form-control" placeholder="0.00">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Estimated Capital Cost (₦)</label>
+                                    <input type="number" step="0.01" name="estimated_capital_cost" class="form-control" placeholder="0.00">
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Agreed Completion Time</label>
+                                    <input type="text" name="agreed_completion_time" class="form-control" placeholder="e.g., 12 months">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="quantity_conform_standard" class="form-check-input" id="quantity_conform">
+                                        <label class="form-check-label" for="quantity_conform">Quantity conformed to standard?</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="quality_conform_standard" class="form-check-input" id="quality_conform">
+                                        <label class="form-check-label" for="quality_conform">Quality conformed to standard?</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============ SECTION 5: JOB DESCRIPTION ============ -->
+                        <div class="section-card">
+                            <h5 class="section-title"><i class="fas fa-tasks"></i> SECTION 5: Job Description</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">5(a) Main Duties Performed (in order of importance)</label>
+                                <textarea name="main_duties" class="form-control" rows="4" placeholder="State your main duties in order of importance..."></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="joint_discussion_with_supervisor" class="form-check-input" id="joint_discussion">
+                                        <label class="form-check-label" for="joint_discussion">Joint discussion with supervisor on targets?</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">5(c) Constraints/Difficulties</label>
+                                    <textarea name="constraints_difficulties" class="form-control" rows="3" placeholder="Were you properly equipped? If not, what difficulties?"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============ SECTION 7: DIFFICULTIES AND SOLUTIONS ============ -->
+                        <div class="section-card">
+                            <h5 class="section-title"><i class="fas fa-exclamation-triangle"></i> SECTION 7: Difficulties and Solutions</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Difficulties encountered in achieving set targets</label>
+                                <textarea name="difficulties_encountered" class="form-control" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Methods adopted by Supervisor to assist</label>
+                                <textarea name="supervisor_assistance_methods" class="form-control" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Periodic review frequency</label>
+                                    <select name="periodic_review_frequency" class="form-select">
+                                        <option value="">Select</option>
+                                        <option value="Three months">Three months</option>
+                                        <option value="Six months">Six months</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="form-check mt-4">
+                                        <input type="checkbox" name="performance_measured_up" class="form-check-input" id="performance_measured">
+                                        <label class="form-check-label" for="performance_measured">Performance measured up to standards?</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Solution/Admonition for shortcomings</label>
+                                <textarea name="solution_admonition" class="form-control" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="final_evaluation_done" class="form-check-input" id="final_evaluation">
+                                        <label class="form-check-label" for="final_evaluation">Final evaluation of targets accomplished?</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============ AD HOC DUTIES ============ -->
+                        <div class="section-card">
+                            <h5 class="section-title"><i class="fas fa-plus-circle"></i> Ad Hoc Duties</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Ad hoc duties performed (not continuous)</label>
+                                <textarea name="ad_hoc_duties" class="form-control" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="ad_hoc_duties_affected" class="form-check-input" id="ad_hoc_affected">
+                                        <label class="form-check-label" for="ad_hoc_affected">Did ad hoc duties affect your real duties?</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="ad_hoc_brought_to_supervisor" class="form-check-input" id="ad_hoc_brought">
+                                        <label class="form-check-label" for="ad_hoc_brought">Brought to supervisor's attention?</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Schedule Duty Period From</label>
+                                    <input type="date" name="schedule_duty_from" class="form-control">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Schedule Duty Period To</label>
+                                    <input type="date" name="schedule_duty_to" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============ SUPERVISORS ============ -->
+                        <div class="section-card">
+                            <h5 class="section-title"><i class="fas fa-user-tie"></i> Supervisors During Period</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Supervisor 1 Name</label>
+                                    <input type="text" name="supervisor1_name" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">From</label>
+                                    <input type="date" name="supervisor1_from" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">To</label>
+                                    <input type="date" name="supervisor1_to" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Supervisor 2 Name</label>
+                                    <input type="text" name="supervisor2_name" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">From</label>
+                                    <input type="date" name="supervisor2_from" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">To</label>
+                                    <input type="date" name="supervisor2_to" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Supervisor 3 Name</label>
+                                    <input type="text" name="supervisor3_name" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">From</label>
+                                    <input type="date" name="supervisor3_from" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">To</label>
+                                    <input type="date" name="supervisor3_to" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============ TRAINING AND PROMOTABILITY ============ -->
+                        <div class="section-card">
+                            <h5 class="section-title"><i class="fas fa-chart-line"></i> Training & Promotability</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Training Recommended</label>
+                                <textarea name="training_recommended" class="form-control" rows="3" placeholder="List any training recommended..."></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Promotability Rating</label>
+                                    <select name="promotability_rating" class="form-select">
+                                        <option value="">Select Rating</option>
+                                        <option value="A">A - Exceptionally well qualified</option>
+                                        <option value="B">B - Ready for promotion</option>
+                                        <option value="C">C - Has promotion potential</option>
+                                        <option value="D">D - Not yet entitled</option>
+                                        <option value="E">E - No evidence of potential</option>
+                                        <option value="F">F - Unlikely to qualify</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Reason for recommendation</label>
+                                    <textarea name="promotion_reason" class="form-control" rows="2"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Accelerated promotion recommendation</label>
+                                <textarea name="accelerated_promotion_recommendation" class="form-control" rows="2" placeholder="If applicable..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- ============ OFFICER'S DECLARATION ============ -->
+                        <div class="section-card">
+                            <h5 class="section-title"><i class="fas fa-file-signature"></i> Officer's Declaration</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="officer_has_seen_report" class="form-check-input" id="officer_seen">
+                                        <label class="form-check-label" for="officer_seen">I certify that I have seen the contents of this report</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Officer's Comments (if any)</label>
+                                <textarea name="officer_comments" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Assigned Officers -->
+                        <div class="section-card">
+                            <h5 class="section-title"><i class="fas fa-user-check"></i> Officer Assignments</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Reporting Officer</label>
+                                    <select name="target_reporting_officer_id" class="form-select">
+                                        <option value="">-- Select Reporting Officer --</option>
+                                        {% for officer in reporting_officers %}
+                                        <option value="{{ officer.id }}" {% if auto_reporting_officer_id == officer.id %}selected{% endif %}>
+                                            {{ officer.full_name or officer.username }} ({{ officer.role }}) - {{ officer.department }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Countersigning Officer</label>
+                                    <select name="target_countersigning_officer_id" class="form-select">
+                                        <option value="">-- Select Countersigning Officer --</option>
+                                        {% for officer in countersigning_officers %}
+                                        <option value="{{ officer.id }}" {% if auto_countersigning_officer_id == officer.id %}selected{% endif %}>
+                                            {{ officer.full_name or officer.username }} ({{ officer.role }}) - {{ officer.ministry }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-save"></i> Create Report
+                            </button>
+                            <a href="{{ url_for('reports.my_reports') }}" class="btn btn-secondary btn-lg px-5">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default dates to current year
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const startOfYear = new Date(currentYear, 0, 1);
+    const endOfYear = new Date(currentYear, 11, 31);
+    
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    
+    const periodFromInput = document.getElementById('period_from');
+    const periodToInput = document.getElementById('period_to');
+    
+    if (periodFromInput && !periodFromInput.value) {
+        periodFromInput.value = formatDate(startOfYear);
+    }
+    if (periodToInput && !periodToInput.value) {
+        periodToInput.value = formatDate(endOfYear);
+    }
+    
+    // Validate date range
+    const form = document.getElementById('reportForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const fromDate = new Date(periodFromInput.value);
+            const toDate = new Date(periodToInput.value);
+            
+            if (fromDate > toDate) {
+                e.preventDefault();
+                alert('Period "To" date must be after "From" date');
+                return false;
+            }
+            
+            // Confirm submission
+            if (!confirm('Please review all entries before submitting. Click OK to create this report.')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+    
+    // Validate number inputs
+    const numberInputs = ['sick_leave_days', 'annual_leave_days', 'casual_leave_days'];
+    numberInputs.forEach(function(name) {
+        const input = document.querySelector(`input[name="${name}"]`);
+        if (input) {
+            input.addEventListener('change', function() {
+                if (this.value < 0) this.value = 0;
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

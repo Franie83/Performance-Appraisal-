@@ -1,0 +1,663 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+    .status-draft { background: #6c757d; color: white; }
+    .status-submitted { background: #ffc107; color: #000; }
+    .status-approved { background: #28a745; color: white; }
+    .status-pending-cs { background: #6f42c1; color: white; }
+    .status-pending-cs-review { background: #6f42c1; color: white; }
+    .status-modified { background: #fd7e14; color: white; }
+    .status-reviewed { background: #28a745; color: white; }
+    .status-finalized { background: #28a745; color: white; }
+    .status-officer-response { background: #17a2b8; color: white; }
+    .status-ro-review { background: #fd7e14; color: white; }
+    .status-ps-review { background: #6f42c1; color: white; }
+    .status-modification-requested { background: #fd7e14; color: white; }
+    
+    .quarter-card {
+        border-left: 4px solid;
+        transition: transform 0.2s;
+        background: white;
+    }
+    .quarter-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .quarter-q1 { border-left-color: #dc3545; }
+    .quarter-q2 { border-left-color: #28a745; }
+    .quarter-q3 { border-left-color: #ffc107; }
+    .quarter-q4 { border-left-color: #17a2b8; }
+    
+    .nav-tabs .nav-link.active {
+        background-color: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .modification-box {
+        background-color: #fff3cd;
+        border-left: 4px solid #fd7e14;
+        padding: 10px;
+        margin-top: 8px;
+        border-radius: 5px;
+    }
+    
+    .btn-edit-resubmit {
+        background-color: #fd7e14;
+        border-color: #fd7e14;
+        color: white;
+    }
+    .btn-edit-resubmit:hover {
+        background-color: #e66a00;
+        border-color: #e66a00;
+        color: white;
+    }
+    
+    .review-box {
+        background-color: #e8f5e9;
+        border-left: 4px solid #28a745;
+        padding: 10px;
+        margin-top: 8px;
+        border-radius: 5px;
+    }
+    
+    .pending-box {
+        background-color: #fff3e0;
+        border-left: 4px solid #ffc107;
+        padding: 10px;
+        margin-top: 8px;
+        border-radius: 5px;
+    }
+    
+    .status-card {
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    .status-pending { background-color: #fff3cd; border-left: 4px solid #ffc107; }
+    .status-success { background-color: #d4edda; border-left: 4px solid #28a745; }
+    .status-info { background-color: #d1ecf1; border-left: 4px solid #17a2b8; }
+    .status-warning { background-color: #fff3cd; border-left: 4px solid #fd7e14; }
+    .status-primary { background-color: #cfe2ff; border-left: 4px solid #0d6efd; }
+    
+    .score-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #28a745;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0 auto;
+    }
+    
+    .appraisal-table {
+        margin-top: 15px;
+    }
+    .appraisal-table th {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .admin-card {
+        border-left: 4px solid #dc3545;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-line"></i> Quarterly Performance Appraisal System</h4>
+                    <small>Edo State Government - Performance Management</small>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="appraisalTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#quarterly" role="tab" aria-selected="true">
+                                <i class="fas fa-calendar-alt"></i> Quarterly Goals
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" href="#reviews" role="tab" aria-selected="false">
+                                <i class="fas fa-clipboard-list"></i> Quarterly Reviews
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" href="#yearly" role="tab" aria-selected="false">
+                                <i class="fas fa-star"></i> Yearly Appraisal
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" href="#completed" role="tab" aria-selected="false">
+                                <i class="fas fa-history"></i> Completed Reviews
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" href="#pending" role="tab" aria-selected="false">
+                                <i class="fas fa-tasks"></i> Pending Actions
+                            </a>
+                        </li>
+                        
+                        <!-- Admin Panel Master Tab - Only visible to ADMIN users -->
+                        {% if current_user.has_role('ADMIN') %}
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" href="#admin" role="tab" aria-selected="false">
+                                <i class="fas fa-shield-alt"></i> Admin Panel Master
+                                <span class="badge bg-danger ms-1">Master</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                    
+                    <div class="tab-content mt-4">
+                        <!-- Quarterly Goals Tab -->
+                        <div class="tab-pane fade show active" id="quarterly" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>My Goals for {{ current_year }}</h5>
+                                <a href="{{ url_for('quarterly.plan_goal') }}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-plus"></i> Add Goal
+                                </a>
+                            </div>
+                            
+                            {% if quarterly_goals %}
+                                {% for quarter in range(1, 5) %}
+                                    {% set quarter_goals = quarterly_goals|selectattr('quarter', 'equalto', quarter)|list %}
+                                    {% if quarter_goals %}
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-light">
+                                            <strong><i class="fas fa-chart-line"></i> Quarter {{ quarter }}</strong>
+                                        </div>
+                                        <div class="card-body">
+                                            {% for goal in quarter_goals %}
+                                            <div class="quarter-card quarter-q{{ quarter }} p-3 mb-3 rounded shadow-sm">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-1">
+                                                            Priority {{ goal.priority }}: {{ goal.goal_description }}
+                                                        </h6>
+                                                        {% if goal.success_criteria %}
+                                                        <small class="text-muted">Success Criteria: {{ goal.success_criteria }}</small>
+                                                        {% endif %}
+                                                        
+                                                        {% if goal.review_status == 'REVIEWED' %}
+                                                        <div class="review-box mt-2">
+                                                            <i class="fas fa-check-circle text-success"></i>
+                                                            <strong>Review Completed:</strong>
+                                                            <p class="mb-1 small">{{ goal.reporting_officer_comments|truncate(100) }}</p>
+                                                            <a href="{{ url_for('quarterly.view_review', goal_id=goal.id) }}" class="btn btn-sm btn-outline-success mt-1">
+                                                                <i class="fas fa-eye"></i> View Full Review
+                                                            </a>
+                                                        </div>
+                                                        {% elif goal.review_status == 'SUBMITTED' %}
+                                                        <div class="pending-box mt-2">
+                                                            <i class="fas fa-clock text-warning"></i>
+                                                            <strong>Pending Review:</strong> Awaiting Reporting Officer's assessment
+                                                        </div>
+                                                        {% elif goal.review_status == 'PENDING_CS_REVIEW' %}
+                                                        <div class="pending-box mt-2">
+                                                            <i class="fas fa-clock text-primary"></i>
+                                                            <strong>Pending CS Final Approval:</strong> Waiting for Countersigning Officer
+                                                        </div>
+                                                        {% endif %}
+                                                        
+                                                        {% if goal.plan_status == 'MODIFIED' and goal.plan_modifications %}
+                                                        <div class="modification-box mt-2">
+                                                            <i class="fas fa-edit text-warning"></i>
+                                                            <strong>Modification Requested:</strong>
+                                                            <p class="mb-0 small">{{ goal.plan_modifications }}</p>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="ms-3 text-end" style="min-width: 130px;">
+                                                        {% if goal.plan_status == 'DRAFT' %}
+                                                            <span class="status-badge status-draft">Draft</span>
+                                                            <form action="{{ url_for('quarterly.submit_goal', goal_id=goal.id) }}" method="POST" class="mt-1" onsubmit="return confirm('Submit this goal for approval?')">
+                                                                <button type="submit" class="btn btn-sm btn-success w-100">Submit</button>
+                                                            </form>
+                                                            <a href="{{ url_for('quarterly.edit_goal', goal_id=goal.id) }}" class="btn btn-sm btn-info w-100 mt-1">
+                                                                <i class="fas fa-edit"></i> Edit
+                                                            </a>
+                                                        {% elif goal.plan_status == 'SUBMITTED' %}
+                                                            <span class="status-badge status-submitted">Pending RO Approval</span>
+                                                        {% elif goal.plan_status == 'PENDING_CS_APPROVAL' %}
+                                                            <span class="status-badge status-pending-cs">Pending CS Approval</span>
+                                                        {% elif goal.plan_status == 'APPROVED' %}
+                                                            <span class="status-badge status-approved">Approved</span>
+                                                            {% if goal.review_status == 'PENDING' %}
+                                                            <a href="{{ url_for('quarterly.quarterly_review', quarter=goal.quarter) }}" class="btn btn-sm btn-primary w-100 mt-1">
+                                                                <i class="fas fa-edit"></i> Submit Review
+                                                            </a>
+                                                            {% endif %}
+                                                        {% elif goal.plan_status == 'MODIFIED' %}
+                                                            <span class="status-badge status-modified">Needs Modification</span>
+                                                            <a href="{{ url_for('quarterly.edit_goal', goal_id=goal.id) }}" class="btn btn-edit-resubmit btn-sm w-100 mt-1">
+                                                                <i class="fas fa-edit"></i> Edit & Resubmit
+                                                            </a>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> No goals created yet. Click "Add Goal" to start planning.
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Quarterly Reviews Tab -->
+                        <div class="tab-pane fade" id="reviews" role="tabpanel">
+                            <h5>Quarterly Performance Reviews</h5>
+                            <div class="row">
+                                {% for quarter in range(1, 5) %}
+                                <div class="col-md-3 mb-3">
+                                    <div class="card quarter-card quarter-q{{ quarter }} h-100 text-center">
+                                        <div class="card-body">
+                                            <h4>Q{{ quarter }}</h4>
+                                            <p class="text-muted">{{ ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'][quarter-1] }}</p>
+                                            {% set quarter_goals = quarterly_goals|selectattr('quarter', 'equalto', quarter)|list %}
+                                            {% if quarter_goals %}
+                                                {% set all_approved = quarter_goals|selectattr('plan_status', 'equalto', 'APPROVED')|list|length == quarter_goals|length %}
+                                                {% if all_approved %}
+                                                    {% set has_pending_review = quarter_goals|selectattr('review_status', 'equalto', 'PENDING')|list|length > 0 %}
+                                                    {% if has_pending_review %}
+                                                        <a href="{{ url_for('quarterly.quarterly_review', quarter=quarter) }}" class="btn btn-primary btn-sm">
+                                                            <i class="fas fa-edit"></i> Submit Review
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="badge bg-success">Review Completed</span>
+                                                        <a href="{{ url_for('quarterly.quarter_summary', quarter=quarter) }}" class="btn btn-sm btn-info mt-2">
+                                                            <i class="fas fa-eye"></i> View Summary
+                                                        </a>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-muted">Awaiting final approval</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">No goals set</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Yearly Appraisal Tab - FIXED: denominator 60, added RO_REVIEW -->
+                        <div class="tab-pane fade" id="yearly" role="tabpanel">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5>My Yearly Appraisals</h5>
+                                        <a href="{{ url_for('quarterly.yearly_appraisal') }}" class="btn btn-success">
+                                            <i class="fas fa-plus"></i> Start New Appraisal
+                                        </a>
+                                    </div>
+                                    
+                                    {% if all_yearly_appraisals %}
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-bordered appraisal-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Year</th>
+                                                    <th>Status</th>
+                                                    <th>Total Score</th>
+                                                    <th>Rating</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for a in all_yearly_appraisals %}
+                                                <tr>
+                                                    <td><strong>{{ a.appraisal_year }}</strong>
+                                                    <td>
+                                                        {% if a.status == 'DRAFT' %}
+                                                            <span class="badge bg-secondary">Draft</span>
+                                                        {% elif a.status == 'SUBMITTED' %}
+                                                            <span class="badge bg-warning">Pending RO Review</span>
+                                                        {% elif a.status == 'OFFICER_RESPONSE' %}
+                                                            <span class="badge bg-info">Response Required</span>
+                                                        {% elif a.status == 'PS_REVIEW' %}
+                                                            <span class="badge bg-primary">Pending PS Review</span>
+                                                        {% elif a.status == 'FINALIZED' %}
+                                                            <span class="badge bg-success">Finalized</span>
+                                                        {% elif a.status == 'MODIFICATION_REQUESTED' %}
+                                                            <span class="badge bg-warning">Modification Requested</span>
+                                                        {% elif a.status == 'RO_REVIEW' %}
+                                                            <span class="badge bg-secondary">With RO</span>
+                                                        {% else %}
+                                                            <span class="badge bg-secondary">{{ a.status }}</span>
+                                                        {% endif %}
+                                                    </a>
+                                                    <td>{{ a.total_score or 0 }}/60
+                                                    <td>{{ a.rating or 'Not Rated' }}
+                                                    <td>
+                                                        {% if a.status == 'DRAFT' %}
+                                                            <a href="{{ url_for('quarterly.yearly_appraisal', year=a.appraisal_year) }}" class="btn btn-sm btn-primary">
+                                                                <i class="fas fa-edit"></i> Continue
+                                                            </a>
+                                                        {% elif a.status == 'SUBMITTED' %}
+                                                            <button class="btn btn-sm btn-secondary" disabled>Pending</button>
+                                                        {% elif a.status == 'OFFICER_RESPONSE' %}
+                                                            <a href="{{ url_for('quarterly.respond_appraisal', appraisal_id=a.id) }}" class="btn btn-sm btn-warning">
+                                                                <i class="fas fa-comment"></i> Respond
+                                                            </a>
+                                                        {% elif a.status == 'PS_REVIEW' %}
+                                                            <button class="btn btn-sm btn-secondary" disabled>With PS</button>
+                                                        {% elif a.status == 'FINALIZED' %}
+                                                            <button class="btn btn-sm btn-success" onclick="downloadPDF({{ a.id }})">
+                                                                <i class="fas fa-file-pdf"></i> Download PDF
+                                                            </button>
+                                                        {% elif a.status == 'MODIFICATION_REQUESTED' %}
+                                                            <a href="{{ url_for('quarterly.yearly_appraisal', year=a.appraisal_year) }}" class="btn btn-sm btn-warning">
+                                                                <i class="fas fa-edit"></i> Edit & Resubmit
+                                                            </a>
+                                                        {% elif a.status == 'RO_REVIEW' %}
+                                                            <button class="btn btn-sm btn-secondary" disabled>With RO</button>
+                                                        {% endif %}
+                                                    </a>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                                        <p>No yearly appraisals found.</p>
+                                        <a href="{{ url_for('quarterly.yearly_appraisal') }}" class="btn btn-primary">
+                                            <i class="fas fa-plus"></i> Start Your First Yearly Appraisal
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Completed Reviews Tab -->
+                        <div class="tab-pane fade" id="completed" role="tabpanel">
+                            <h5>All Completed Reviews</h5>
+                            {% set completed_reviews = quarterly_goals|selectattr('review_status', 'equalto', 'REVIEWED')|list %}
+                            {% if completed_reviews %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead class="table-success">
+                                        <tr><th>Quarter</th><th>Goal</th><th>Review Date</th><th>Action</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for goal in completed_reviews|sort(attribute='quarter') %}
+                                        <tr>
+                                            <td>Q{{ goal.quarter }}
+                                            <td>{{ goal.goal_description|truncate(60) }}
+                                            <td>{{ goal.review_completed_at.strftime('%d %b %Y') if goal.review_completed_at else 'N/A' }}
+                                            <td><a href="{{ url_for('quarterly.view_review', goal_id=goal.id) }}" class="btn btn-sm btn-info">View Feedback</a>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">No completed reviews yet.</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Pending Actions Tab -->
+                        <div class="tab-pane fade" id="pending" role="tabpanel">
+                            <h5>Pending Approvals &amp; Reviews</h5>
+                            
+                            {% if pending_plan_approvals %}
+                            <div class="card mb-3">
+                                <div class="card-header bg-warning">
+                                    <strong>Goals Pending RO Approval ({{ pending_plan_approvals|length }})</strong>
+                                </div>
+                                <div class="card-body">
+                                    {% for goal in pending_plan_approvals %}
+                                    <div class="border-bottom pb-2 mb-2">
+                                        <div><strong>{{ goal.user.full_name or goal.user.username }}</strong> - Q{{ goal.quarter }}: {{ goal.goal_description|truncate(80) }}</div>
+                                        <div><small>Submitted: {{ goal.plan_submitted_at.strftime('%d %b %Y') if goal.plan_submitted_at else 'N/A' }}</small></div>
+                                        <a href="{{ url_for('quarterly.approve_goal', goal_id=goal.id) }}" class="btn btn-sm btn-primary mt-1">Review & Approve</a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if pending_reviews %}
+                            <div class="card mb-3">
+                                <div class="card-header bg-info text-white">
+                                    <strong>Quarterly Reviews Pending RO Review ({{ pending_reviews|length }})</strong>
+                                </div>
+                                <div class="card-body">
+                                    {% for goal in pending_reviews %}
+                                    <div class="border-bottom pb-2 mb-2">
+                                        <div><strong>{{ goal.user.full_name or goal.user.username }}</strong> - Q{{ goal.quarter }}: {{ goal.goal_description|truncate(80) }}</div>
+                                        <div><small>Submitted: {{ goal.review_submitted_at.strftime('%d %b %Y') if goal.review_submitted_at else 'N/A' }}</small></div>
+                                        <a href="{{ url_for('quarterly.review_quarterly', goal_id=goal.id) }}" class="btn btn-sm btn-info mt-1">Review Report</a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if pending_cs_approvals %}
+                            <div class="card mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <strong><i class="fas fa-user-tie"></i> Goals Pending CS Final Approval ({{ pending_cs_approvals|length }})</strong>
+                                </div>
+                                <div class="card-body">
+                                    {% for goal in pending_cs_approvals %}
+                                    <div class="border-bottom pb-2 mb-2">
+                                        <div><strong>{{ goal.user.full_name or goal.user.username }}</strong> - Q{{ goal.quarter }}: {{ goal.goal_description|truncate(80) }}</div>
+                                        <div><small>Approved by RO: {{ goal.plan_approved_at.strftime('%d %b %Y') if goal.plan_approved_at else 'N/A' }}</small></div>
+                                        <a href="{{ url_for('quarterly.approve_goal', goal_id=goal.id) }}" class="btn btn-sm btn-primary mt-1">
+                                            <i class="fas fa-gavel"></i> Final Approve
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if pending_cs_reviews %}
+                            <div class="card mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <strong><i class="fas fa-user-tie"></i> Quarterly Reviews Pending CS Final Approval ({{ pending_cs_reviews|length }})</strong>
+                                </div>
+                                <div class="card-body">
+                                    {% for goal in pending_cs_reviews %}
+                                    <div class="border-bottom pb-2 mb-2">
+                                        <div><strong>{{ goal.user.full_name or goal.user.username }}</strong> - Q{{ goal.quarter }}: {{ goal.goal_description|truncate(80) }}</div>
+                                        <div><small>Reviewed by RO: {{ goal.review_completed_at.strftime('%d %b %Y') if goal.review_completed_at else 'N/A' }}</small></div>
+                                        <a href="{{ url_for('quarterly.review_quarterly', goal_id=goal.id) }}" class="btn btn-sm btn-primary mt-1">
+                                            <i class="fas fa-gavel"></i> Final Approve
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if pending_appraisals %}
+                            <div class="card mb-3">
+                                <div class="card-header bg-success text-white">
+                                    <strong>Yearly Appraisals Pending RO Review ({{ pending_appraisals|length }})</strong>
+                                </div>
+                                <div class="card-body">
+                                    {% for appraisal in pending_appraisals %}
+                                    <div class="border-bottom pb-2 mb-2">
+                                        <div><strong>{{ appraisal.user.full_name or appraisal.user.username }}</strong> - {{ appraisal.appraisal_year }}</div>
+                                        <a href="{{ url_for('quarterly.ro_yearly_appraisal', appraisal_id=appraisal.id) }}" class="btn btn-sm btn-success mt-1">Assess Appraisal</a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if pending_ps_reviews %}
+                            <div class="card mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <strong><i class="fas fa-user-tie"></i> Yearly Appraisals Pending CS/PS Review ({{ pending_ps_reviews|length }})</strong>
+                                </div>
+                                <div class="card-body">
+                                    {% for appraisal in pending_ps_reviews %}
+                                    <div class="border-bottom pb-2 mb-2">
+                                        <div><strong>{{ appraisal.user.full_name or appraisal.user.username }}</strong> - {{ appraisal.appraisal_year }}</div>
+                                        <div><small>Officer has accepted the assessment</small></div>
+                                        <a href="{{ url_for('quarterly.ps_review', appraisal_id=appraisal.id) }}" class="btn btn-sm btn-primary mt-1">
+                                            <i class="fas fa-gavel"></i> Review & Finalize
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if not pending_plan_approvals and not pending_reviews and not pending_cs_approvals and not pending_cs_reviews and not pending_appraisals and not pending_ps_reviews %}
+                            <div class="alert alert-success">No pending actions! All caught up.</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Admin Panel Tab - Only visible to ADMIN users -->
+                        {% if current_user.has_role('ADMIN') %}
+                        <div class="tab-pane fade" id="admin" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <div class="alert alert-danger">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        <strong>ADMIN MASTER CONTROL:</strong> You have full access to all system data.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Goal Management Section -->
+                            <div class="card mb-3 admin-card">
+                                <div class="card-header bg-dark text-white">
+                                    <h5><i class="fas fa-bullseye"></i> Goal Management</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <a href="/quarterly/admin/create-goal" class="btn btn-success w-100 mb-2">
+                                                <i class="fas fa-plus"></i> Create Goal For Any User
+                                            </a>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <a href="/quarterly/admin/manage-goals" class="btn btn-primary w-100 mb-2">
+                                                <i class="fas fa-edit"></i> Manage All Goals
+                                            </a>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <form method="POST" action="/quarterly/admin/bulk-approve-goals" id="bulkApproveGoalsForm">
+                                                <button type="button" class="btn btn-warning w-100 mb-2" onclick="bulkApproveGoals()">
+                                                    <i class="fas fa-check-double"></i> Bulk Approve Goals
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Quarterly Review Management -->
+                            <div class="card mb-3 admin-card">
+                                <div class="card-header bg-dark text-white">
+                                    <h5><i class="fas fa-clipboard-list"></i> Quarterly Review Management</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <a href="/quarterly/admin/manage-reviews" class="btn btn-primary w-100 mb-2">
+                                                <i class="fas fa-eye"></i> Manage All Reviews
+                                            </a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <form method="POST" action="/quarterly/admin/bulk-approve-reviews" id="bulkApproveReviewsForm">
+                                                <button type="button" class="btn btn-warning w-100 mb-2" onclick="bulkApproveReviews()">
+                                                    <i class="fas fa-check-double"></i> Bulk Approve Reviews
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Yearly Appraisal Management -->
+                            <div class="card mb-3 admin-card">
+                                <div class="card-header bg-dark text-white">
+                                    <h5><i class="fas fa-star"></i> Yearly Appraisal Management</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <a href="/quarterly/admin/create-appraisal" class="btn btn-success w-100 mb-2">
+                                                <i class="fas fa-plus"></i> Create Appraisal For Any User
+                                            </a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <a href="/quarterly/admin/manage-appraisals" class="btn btn-primary w-100 mb-2">
+                                                <i class="fas fa-edit"></i> Manage All Appraisals
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function downloadPDF(appraisalId) {
+    window.location.href = `/quarterly/export-pdf/${appraisalId}`;
+}
+
+function bulkApproveGoals() {
+    var goalIds = prompt("Enter goal IDs to approve (comma-separated, e.g., 1,2,3):");
+    if (goalIds) {
+        var form = document.getElementById('bulkApproveGoalsForm');
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'goal_ids';
+        input.value = goalIds;
+        form.appendChild(input);
+        form.submit();
+    }
+}
+
+function bulkApproveReviews() {
+    var reviewIds = prompt("Enter review IDs to approve (comma-separated, e.g., 1,2,3):");
+    if (reviewIds) {
+        var form = document.getElementById('bulkApproveReviewsForm');
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'review_ids';
+        input.value = reviewIds;
+        form.appendChild(input);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

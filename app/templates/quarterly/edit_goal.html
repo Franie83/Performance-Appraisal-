@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h4><i class="fas fa-edit"></i> Edit Goal</h4>
+                    <small>Modify your goal based on feedback and resubmit</small>
+                </div>
+                <div class="card-body">
+                    {% if goal.plan_modifications %}
+                    <div class="alert alert-warning mb-4">
+                        <i class="fas fa-comment-dots"></i>
+                        <strong>Reporting Officer's Feedback:</strong>
+                        <p class="mb-0 mt-2">{{ goal.plan_modifications }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Planning Year</label>
+                                <input type="text" class="form-control" value="{{ goal.planning_year }}" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Quarter</label>
+                                <select name="quarter" class="form-select" required>
+                                    <option value="1" {% if goal.quarter == 1 %}selected{% endif %}>Quarter 1 (January - March)</option>
+                                    <option value="2" {% if goal.quarter == 2 %}selected{% endif %}>Quarter 2 (April - June)</option>
+                                    <option value="3" {% if goal.quarter == 3 %}selected{% endif %}>Quarter 3 (July - September)</option>
+                                    <option value="4" {% if goal.quarter == 4 %}selected{% endif %}>Quarter 4 (October - December)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Goal Description *</label>
+                            <textarea name="goal_description" class="form-control" rows="4" required>{{ goal.goal_description }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Priority Level</label>
+                                <select name="priority" class="form-select">
+                                    <option value="1" {% if goal.priority == 1 %}selected{% endif %}>1 - Highest Priority</option>
+                                    <option value="2" {% if goal.priority == 2 %}selected{% endif %}>2 - High Priority</option>
+                                    <option value="3" {% if goal.priority == 3 %}selected{% endif %}>3 - Medium Priority</option>
+                                    <option value="4" {% if goal.priority == 4 %}selected{% endif %}>4 - Low Priority</option>
+                                    <option value="5" {% if goal.priority == 5 %}selected{% endif %}>5 - Lowest Priority</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Success Criteria</label>
+                            <textarea name="success_criteria" class="form-control" rows="3">{{ goal.success_criteria }}</textarea>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-lightbulb"></i>
+                            <strong>SMART Goal Tips:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li><strong>S</strong>pecific - Clearly define what you want to achieve</li>
+                                <li><strong>M</strong>easurable - Include metrics to track progress</li>
+                                <li><strong>A</strong>chievable - Ensure it's realistic and attainable</li>
+                                <li><strong>R</strong>elevant - Align with departmental/MDA goals</li>
+                                <li><strong>T</strong>ime-bound - Set clear deadlines and milestones</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-warning px-4">
+                                <i class="fas fa-save"></i> Update & Resubmit
+                            </button>
+                            <a href="{{ url_for('quarterly.dashboard') }}" class="btn btn-secondary px-4">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

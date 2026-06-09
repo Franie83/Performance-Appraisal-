@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Edo State Government Colors */
+    :root {
+        --edo-green: #008751;
+        --edo-dark-green: #00633E;
+        --edo-light-green: #E8F5E9;
+        --edo-gold: #D4AF37;
+        --edo-white: #FFFFFF;
+    }
+    
+    /* Sidebar Toggle Styles */
+    .wrapper {
+        display: flex;
+        width: 100%;
+        align-items: stretch;
+    }
+    
+    .sidebar {
+        min-width: 280px;
+        max-width: 280px;
+        transition: all 0.3s;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        z-index: 999;
+        background: linear-gradient(135deg, #00633E 0%, #008751 100%);
+    }
+    
+    .sidebar.active {
+        margin-left: -280px;
+    }
+    
+    .sidebar.active + .main-content {
+        width: 100%;
+    }
+    
+    .main-content {
+        width: 100%;
+        transition: all 0.3s;
+    }
+    
+    #sidebarToggle {
+        cursor: pointer;
+        transition: all 0.3s;
+        background: var(--edo-green);
+    }
+    
+    #sidebarToggle:hover {
+        background: var(--edo-dark-green);
+        transform: scale(1.1);
+    }
+    
+    .sidebar .nav-link {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #cbd5e1;
+        transition: all 0.3s;
+    }
+    
+    .sidebar .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+    
+    .sidebar .nav-link.active {
+        background-color: var(--edo-gold);
+        color: var(--edo-dark-green);
+    }
+    
+    .sidebar .nav-link.text-danger:hover {
+        background-color: rgba(220, 53, 69, 0.2);
+        color: #dc3545 !important;
+    }
+    
+    .sidebar.active .nav-link span,
+    .sidebar.active .nav-link i + span {
+        display: none;
+    }
+    
+    .sidebar.active .text-center h6,
+    .sidebar.active .text-center .badge,
+    .sidebar.active hr .bg-secondary,
+    .sidebar.active .small {
+        display: none;
+    }
+    
+    .sidebar.active .text-center i {
+        font-size: 2rem;
+        margin-bottom: 0;
+    }
+    
+    .sidebar.active .nav-link {
+        text-align: center;
+        padding: 10px 0;
+    }
+    
+    /* Dropdown inside sidebar */
+    .sidebar .dropdown-menu {
+        background-color: #00633E;
+        border: 1px solid #008751;
+        margin-left: 30px;
+        position: relative;
+        width: calc(100% - 40px);
+    }
+    
+    .sidebar .dropdown-menu .dropdown-item {
+        color: #e0e0e0;
+        padding: 8px 20px;
+    }
+    
+    .sidebar .dropdown-menu .dropdown-item:hover {
+        background-color: #008751;
+        color: white;
+    }
+    
+    .sidebar .dropdown-menu .dropdown-header {
+        color: #D4AF37;
+        font-size: 11px;
+        font-weight: bold;
+    }
+    
+    .sidebar .dropdown-toggle::after {
+        float: right;
+        margin-top: 8px;
+    }
+    
+    /* Toggle button styles */
+    .toggle-btn {
+        position: fixed;
+        left: 290px;
+        top: 20px;
+        z-index: 1000;
+        background: var(--edo-green);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .toggle-btn:hover {
+        background: var(--edo-dark-green);
+        transform: scale(1.05);
+    }
+    
+    .toggle-btn.active {
+        left: 20px;
+    }
+    
+    /* Card headers with Edo Green */
+    .card-header.bg-primary {
+        background: linear-gradient(135deg, var(--edo-dark-green) 0%, var(--edo-green) 100%) !important;
+    }
+    
+    .card-header.bg-success {
+        background: var(--edo-green) !important;
+    }
+    
+    .card-header.bg-info {
+        background: var(--edo-dark-green) !important;
+    }
+    
+    .btn-primary {
+        background-color: var(--edo-green);
+        border-color: var(--edo-green);
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--edo-dark-green);
+        border-color: var(--edo-dark-green);
+    }
+    
+    .btn-outline-primary {
+        color: var(--edo-green);
+        border-color: var(--edo-green);
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--edo-green);
+        border-color: var(--edo-green);
+    }
+    
+    .btn-outline-success {
+        color: var(--edo-green);
+        border-color: var(--edo-green);
+    }
+    
+    .btn-outline-success:hover {
+        background-color: var(--edo-green);
+        border-color: var(--edo-green);
+    }
+    
+    .badge.bg-success {
+        background-color: var(--edo-green) !important;
+    }
+    
+    .bg-success {
+        background-color: var(--edo-green) !important;
+    }
+    
+    .text-success {
+        color: var(--edo-green) !important;
+    }
+    
+    .alert-success {
+        background-color: var(--edo-light-green);
+        border-color: var(--edo-green);
+        color: var(--edo-dark-green);
+    }
+    
+    @media (max-width: 768px) {
+        .sidebar {
+            position: fixed;
+            z-index: 1000;
+        }
+        .toggle-btn {
+            left: 290px;
+        }
+        .toggle-btn.active {
+            left: 20px;
+        }
+    }
+</style>
+
+<div class="wrapper">
+    <!-- Sidebar Navigation -->
+    <div class="sidebar text-white" id="sidebar">
+        <div class="text-center mb-4 p-3">
+            <i class="fas fa-user-circle fa-3x"></i>
+            <h6 class="mt-2">{{ current_user.username }}</h6>
+            <span class="badge bg-warning text-dark">{{ current_user.role }}</span>
+        </div>
+        <hr class="bg-secondary mx-2">
+        <nav class="nav flex-column">
+            <a class="nav-link text-white" href="{{ url_for('reports.dashboard') }}">
+                <i class="fas fa-tachometer-alt me-2"></i> <span>Dashboard</span>
+            </a>
+            <a class="nav-link text-white" href="{{ url_for('officers.profile') }}">
+                <i class="fas fa-user-edit me-2"></i> <span>My Profile</span>
+            </a>
+            <a class="nav-link text-white" href="{{ url_for('reports.my_reports') }}">
+                <i class="fas fa-file-alt me-2"></i> <span>My Reports</span>
+            </a>
+            <a class="nav-link text-white" href="{{ url_for('reports.create_report') }}">
+                <i class="fas fa-plus-circle me-2"></i> <span>New Report</span>
+            </a>
+            <a class="nav-link text-white" href="{{ url_for('assessments.pending_assessments') }}">
+                <i class="fas fa-clipboard-list me-2"></i> <span>Pending Assessments</span>
+            </a>
+            <a class="nav-link text-white" href="{{ url_for('quarterly.dashboard') }}">
+                <i class="fas fa-chart-line me-2"></i> <span>Quarterly Appraisal</span>
+            </a>
+            
+            <!-- ADMIN SECTION -->
+            {% if current_user.has_role('ADMIN') %}
+            <hr class="bg-secondary mx-2">
+            <div class="small text-secondary mb-2 px-3">ADMIN SECTION</div>
+            
+            <!-- Manage Officer Profiles -->
+            <a class="nav-link text-white" href="{{ url_for('admin.manage_officers') }}">
+                <i class="fas fa-id-card me-2"></i> <span>Manage Officer Profiles</span>
+            </a>
+            
+            <!-- System Actions Dropdown - MOVED TO SIDEBAR -->
+            <div class="nav-item dropdown">
+                <a class="nav-link text-white dropdown-toggle" href="#" id="systemActionsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cogs me-2"></i> <span>System Actions</span>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="systemActionsDropdown">
+                    <li><a class="dropdown-item" href="/quarterly/admin/audit-trail">
+                        <i class="fas fa-history"></i> Audit Trail
+                    </a></li>
+                    <li><a class="dropdown-item" href="/quarterly/admin/clear-test-data" onclick="return confirm('Are you sure? This will delete ALL test data!')">
+                        <i class="fas fa-trash-alt"></i> Clear Test Data
+                    </a></li>
+                    <li><a class="dropdown-item" href="/quarterly/admin/export-all-data">
+                        <i class="fas fa-download"></i> Export All Data
+                    </a></li>
+                    <li><a class="dropdown-item" href="/quarterly/admin/system-stats">
+                        <i class="fas fa-chart-bar"></i> System Statistics
+                    </a></li>
+                </ul>
+            </div>
+            {% endif %}
+            
+            <hr class="bg-secondary mx-2">
+            <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
+                <i class="fas fa-sign-out-alt me-2"></i> <span>Logout</span>
+            </a>
+        </nav>
+    </div>
+    
+    <!-- Toggle Button -->
+    <button class="toggle-btn" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid">
+            <!-- Welcome Card -->
+            <div class="card shadow-sm mb-4 mt-2">
+                <div class="card-header text-white">
+                    <h4 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Edo State Performance Dashboard</h4>
+                </div>
+                <div class="card-body">
+                    <h5>Welcome, {{ current_user.username }}!</h5>
+                    <p class="mb-0">
+                        <i class="fas fa-calendar-alt me-2 text-muted"></i>
+                        Member since: {{ current_user.created_at.strftime('%B %Y') if current_user.created_at else 'N/A' }}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Appraisal Type Cards -->
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 shadow-sm border-success">
+                        <div class="card-body text-center">
+                            <i class="fas fa-file-alt fa-3x text-success mb-2"></i>
+                            <h4>Gen 79A Appraisal</h4>
+                            <p class="text-muted">Annual Performance Evaluation Report</p>
+                            <a href="{{ url_for('reports.my_reports') }}" class="btn btn-success btn-sm">Go to Gen 79A</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 shadow-sm border-success">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-line fa-3x text-success mb-2"></i>
+                            <h4>Quarterly Appraisal</h4>
+                            <p class="text-muted">Quarterly Performance Tracking System</p>
+                            <a href="{{ url_for('quarterly.dashboard') }}" class="btn btn-success btn-sm">Go to Quarterly</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Sidebar Toggle
+const sidebar = document.getElementById('sidebar');
+const toggleBtn = document.getElementById('sidebarToggle');
+const mainContent = document.querySelector('.main-content');
+
+if (localStorage.getItem('sidebarCollapsed') === 'true') {
+    sidebar.classList.add('active');
+    toggleBtn.classList.add('active');
+}
+
+toggleBtn.addEventListener('click', function() {
+    sidebar.classList.toggle('active');
+    this.classList.toggle('active');
+    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('active'));
+});
+</script>
+{% endblock %}

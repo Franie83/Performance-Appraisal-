@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4>Yearly Appraisal Assessment</h4>
+                    <p class="mb-0">Officer: {{ appraisal.user.full_name or appraisal.user.username }} | Year: {{ appraisal.appraisal_year }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Officer's Annual Report:</strong><br>
+                        {{ appraisal.annual_report or 'No report submitted' }}
+                    </div>
+                    
+                    <form method="POST">
+                        <h5>SECTION A: Automated Assessments</h5>
+                        <p class="text-muted">These would normally be populated automatically from JOOPSA, HRM, and 360 reviews</p>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label>Training Attendance Score (from JOOPSA) 0-10</label>
+                                <input type="number" name="training_attendance_score" 
+                                       value="{{ appraisal.training_attendance_score or 0 }}" 
+                                       min="0" max="10" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Clock-in Report Score (from HRM) 0-5</label>
+                                <input type="number" name="clock_in_score" 
+                                       value="{{ appraisal.clock_in_score or 0 }}" 
+                                       min="0" max="5" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label>360 Review Score (Peer Review) 0-5</label>
+                                <input type="number" name="peer_review_score" 
+                                       value="{{ appraisal.peer_review_score or 0 }}" 
+                                       min="0" max="5" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <h5>SECTION B: Reporting Officer's Assessment</h5>
+                        <p class="text-muted">Rate the officer on a scale of 1 to 5 (5 is the highest)</p>
+                        
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="70%">Criteria</th>
+                                    <th width="30%">Rating (1-5)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Officer diligently executed all tasks during the period under review</td>
+                                    <td><select name="diligently_executed" class="form-select" required>
+                                        <option value="1">1 - Poor</option>
+                                        <option value="2">2 - Below Average</option>
+                                        <option value="3" selected>3 - Average</option>
+                                        <option value="4">4 - Good</option>
+                                        <option value="5">5 - Excellent</option>
+                                    </select></td>
+                                </tr>
+                                <tr><td>Officer delivered his/her task within the agreed timelines</td>
+                                    <td><select name="delivered_timelines" class="form-select" required>
+                                        <option value="1">1</option><option value="2">2</option>
+                                        <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                                    </select></td>
+                                </tr>
+                                <tr><td>Officer was punctual and contributed effectively at work</td>
+                                    <td><select name="punctuality_effectiveness" class="form-select" required>
+                                        <option value="1">1</option><option value="2">2</option>
+                                        <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                                    </select></td>
+                                </tr>
+                                <tr><td>Officer appeared decent and presentable at work and work functions</td>
+                                    <td><select name="decency_presentability" class="form-select" required>
+                                        <option value="1">1</option><option value="2">2</option>
+                                        <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                                    </select></td>
+                                </tr>
+                                <tr><td>Officer was highly productive</td>
+                                    <td><select name="productivity" class="form-select" required>
+                                        <option value="1">1</option><option value="2">2</option>
+                                        <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                                    </select></td>
+                                </tr>
+                                <tr><td>Officer exhibited good and effective communication skills</td>
+                                    <td><select name="communication_skills" class="form-select" required>
+                                        <option value="1">1</option><option value="2">2</option>
+                                        <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                                    </select></td>
+                                </tr>
+                                <tr><td>Officer collaborated with the team to achieve the overall goal of the MDA</td>
+                                    <td><select name="team_collaboration" class="form-select" required>
+                                        <option value="1">1</option><option value="2">2</option>
+                                        <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                                    </select></td>
+                                </tr>
+                                <tr><td>Officer can work independently without supervision</td>
+                                    <td><select name="independent_work" class="form-select" required>
+                                        <option value="1">1</option><option value="2">2</option>
+                                        <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                                    </select></td>
+                                </tr>
+                                <tr><td>Officer is open to criticism and is willing to learn</td>
+                                    <td><select name="openness_to_learning" class="form-select" required>
+                                        <option value="1">1</option><option value="2">2</option>
+                                        <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                                    </select></td>
+                                </tr>
+                                <tr><td>Officer is highly proactive and uses initiative</td>
+                                    <td><select name="proactivity_initiative" class="form-select" required>
+                                        <option value="1">1</option><option value="2">2</option>
+                                        <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                                    </select></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="form-group mb-4">
+                            <label>Reporting Officer's Comments</label>
+                            <textarea name="comments" rows="4" class="form-control">{{ appraisal.reporting_officer_comments or '' }}</textarea>
+                            <small class="text-muted">Provide overall comments on the officer's performance</small>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" name="action" value="approve" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle"></i> Approve & Send to Officer
+                            </button>
+                            <button type="submit" name="action" value="request_modification" class="btn btn-warning btn-lg">
+                                <i class="fas fa-edit"></i> Request Modification
+                            </button>
+                            <a href="{{ url_for('quarterly.dashboard') }}" class="btn btn-secondary btn-lg">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>Next Step: The officer will be notified to review this assessment and provide their response.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

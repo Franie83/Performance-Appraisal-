@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .status-draft { background: #6c757d; color: white; }
+    .status-submitted { background: #ffc107; color: #000; }
+    .status-approved { background: #28a745; color: white; }
+    .status-rejected { background: #dc3545; color: white; }
+    
+    .filter-section {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .action-buttons .btn {
+        margin: 2px;
+    }
+    
+    .admin-card {
+        border-left: 4px solid #dc3545;
+        margin-bottom: 20px;
+    }
+    
+    .user-selector {
+        background: linear-gradient(135deg, #00633E 0%, #008751 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .user-selector select, .user-selector input {
+        background: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        width: 100%;
+    }
+    
+    .user-selector button {
+        background: var(--edo-gold);
+        color: var(--edo-dark-green);
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+        width: 100%;
+    }
+    
+    .user-selector button:hover {
+        background: #c5a020;
+    }
+    
+    .table-actions {
+        white-space: nowrap;
+    }
+    
+    .badge-admin {
+        background-color: #dc3545;
+        color: white;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 10px;
+        margin-left: 8px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-file-alt"></i> My Performance Reports</h4>
+                    <small>Gen 79A Annual Performance Evaluation Reports</small>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Admin User Selector - Only visible to ADMIN -->
+                    {% if current_user.has_role('ADMIN') and all_users %}
+                    <div class="user-selector">
+                        <div class="row align-items-center">
+                            <div class="col-md-12 mb-2">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-user-shield"></i> Admin Management Console
+                                    <span class="badge-admin">ADMIN ACCESS</span>
+                                </h5>
+                                <small>You can manage reports and profiles for any user</small>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="userSelect" class="form-select">
+                                    <option value="">-- Select User --</option>
+                                    {% for user in all_users %}
+                                    <option value="{{ user.id }}" {% if viewing_user and viewing_user.id == user.id %}selected{% endif %}>
+                                        {{ user.username }} - {{ user.full_name or user.email }} ({{ user.role }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" id="searchUser" class="form-control" placeholder="Search user...">
+                            </div>
+                            <div class="col-md-3">
+                                <select id="roleFilter" class="form-select">
+                                    <option value="">All Roles</option>
+                                    <option value="OFFICER">Officer</option>
+                                    <option value="REPORTING_OFFICER">Reporting Officer</option>
+                                    <option value="COUNTERSIGNING_OFFICER">Countersigning Officer</option>
+                                    <option value="HR">HR</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn w-100" id="loadUserReports">
+                                    <i class="fas fa-search"></i> Load Reports
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Admin Actions - REMOVED Manage All Users button -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <a href="{{ url_for('admin.manage_officers') }}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-id-card"></i> Manage Officer Profiles
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ url_for('reports.create_report') }}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-plus"></i> Create New Report
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-danger w-100" onclick="exportReports()">
+                                <i class="fas fa-download"></i> Export All Reports
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Filter Section -->
+                    <div class="filter-section">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Filter by Year</label>
+                                <select id="yearFilter" class="form-select">
+                                    <option value="">All Years</option>
+                                    {% for year in available_years %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Filter by Status</label>
+                                <select id="statusFilter" class="form-select">
+                                    <option value="">All Status</option>
+                                    <option value="DRAFT">Draft</option>
+                                    <option value="SUBMITTED">Submitted</option>
+                                    <option value="APPROVED">Approved</option>
+                                    <option value="REJECTED">Rejected</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Search Reports</label>
+                                <input type="text" id="searchReport" class="form-control" placeholder="Search by title or comments...">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-success w-100" id="applyFilters">
+                                    <i class="fas fa-filter"></i> Apply Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Reports Table -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead class="table-success">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Officer Name</th>
+                                    <th>Staff No</th>
+                                    <th>Reporting Period</th>
+                                    <th>Year</th>
+                                    <th>Status</th>
+                                    <th>Total Score</th>
+                                    <th>Rating</th>
+                                    <th>Submitted Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportsTableBody">
+                                {% if reports %}
+                                    {% for report in reports %}
+                                    <tr>
+                                        <td>{{ report.id }}</a>
+                                        <td>
+                                            {% set officer_user = report.staff_user or report.user %}
+                                            {% if officer_user %}
+                                                {{ officer_user.full_name or officer_user.username }}
+                                            {% else %}
+                                                User ID: {{ report.user_id }}
+                                            {% endif %}
+                                            {% if current_user.has_role('ADMIN') %}
+                                            <br>
+                                            <small class="text-muted">
+                                                <a href="{{ url_for('admin.edit_officer_profile', user_id=report.user_id) }}" class="text-info">
+                                                    <i class="fas fa-edit"></i> Edit Profile
+                                                </a>
+                                            </small>
+                                            {% endif %}
+                                        </a>
+                                        <td>{{ report.staff_user.staff_no if report.staff_user else '-' }}</a>
+                                        <td>{{ report.reporting_period or 'Annual' }}</a>
+                                        <td>{{ report.report_year }}</a>
+                                        <td>
+                                            <span class="status-badge status-{{ report.status|lower }}">
+                                                {{ report.status }}
+                                            </span>
+                                        </a>
+                                        <td>{{ report.total_score or 'N/A' }}</a>
+                                        <td>{{ report.rating or 'N/A' }}</a>
+                                        <td>{{ report.submitted_at.strftime('%Y-%m-%d') if report.submitted_at else 'Not submitted' }}</a>
+                                        <td class="table-actions">
+                                            <div class="action-buttons">
+                                                <a href="{{ url_for('reports.view_report', report_id=report.id) }}" class="btn btn-sm btn-info" title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if report.status == 'DRAFT' %}
+                                                <a href="{{ url_for('reports.create_report') }}?edit={{ report.id }}" class="btn btn-sm btn-warning" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <!-- SUBMIT BUTTON ADDED -->
+                                                <button class="btn btn-sm btn-success" onclick="submitReport({{ report.id }})" title="Submit for Approval">
+                                                    <i class="fas fa-paper-plane"></i> Submit
+                                                </button>
+                                                {% endif %}
+                                                {% if current_user.has_role('ADMIN') %}
+                                                <button class="btn btn-sm btn-danger" onclick="deleteReport({{ report.id }})" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                                <a href="{{ url_for('reports.export_pdf', report_id=report.id) }}" class="btn btn-sm btn-success" title="Download PDF">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </a>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="10" class="text-center">
+                                            <div class="py-4">
+                                                <i class="fas fa-file-alt fa-3x text-muted mb-2"></i>
+                                                <p>No reports found.</p>
+                                                {% if not current_user.has_role('ADMIN') %}
+                                                <a href="{{ url_for('reports.create_report') }}" class="btn btn-primary">
+                                                    <i class="fas fa-plus"></i> Create Your First Report
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </a>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Admin user selector functionality
+document.getElementById('loadUserReports')?.addEventListener('click', function() {
+    const userId = document.getElementById('userSelect').value;
+    if (userId) {
+        window.location.href = '/reports/my-reports?user_id=' + userId;
+    } else {
+        alert('Please select a user');
+    }
+});
+
+// Search user functionality
+document.getElementById('searchUser')?.addEventListener('keyup', function() {
+    const searchTerm = this.value.toLowerCase();
+    const select = document.getElementById('userSelect');
+    for (let i = 0; i < select.options.length; i++) {
+        const option = select.options[i];
+        const text = option.text.toLowerCase();
+        if (text.includes(searchTerm)) {
+            option.style.display = '';
+        } else {
+            option.style.display = 'none';
+        }
+    }
+});
+
+// Role filter for user selector
+document.getElementById('roleFilter')?.addEventListener('change', function() {
+    const role = this.value;
+    const select = document.getElementById('userSelect');
+    for (let i = 0; i < select.options.length; i++) {
+        const option = select.options[i];
+        if (!role || option.text.includes(role)) {
+            option.style.display = '';
+        } else {
+            option.style.display = 'none';
+        }
+    }
+});
+
+// Apply filters
+document.getElementById('applyFilters')?.addEventListener('click', function() {
+    const year = document.getElementById('yearFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    const search = document.getElementById('searchReport').value;
+    
+    let url = window.location.pathname + '?';
+    if (year) url += 'year=' + year + '&';
+    if (status) url += 'status=' + status + '&';
+    if (search) url += 'search=' + encodeURIComponent(search) + '&';
+    
+    // Preserve user_id if set
+    const userId = document.getElementById('userSelect')?.value;
+    if (userId) url += 'user_id=' + userId + '&';
+    
+    window.location.href = url;
+});
+
+// Export reports function
+function exportReports() {
+    const userId = document.getElementById('userSelect')?.value;
+    let url = '/admin/export-reports';
+    if (userId) url += '?user_id=' + userId;
+    window.location.href = url;
+}
+
+// Delete report function
+function deleteReport(reportId) {
+    if (confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+        fetch('/reports/delete/' + reportId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Report deleted successfully');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting report');
+        });
+    }
+}
+
+// NEW: Submit report function
+function submitReport(reportId) {
+    if (confirm('Submit this report for approval? Once submitted, you cannot edit it until the Reporting Officer returns it.')) {
+        fetch('/reports/submit/' + reportId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Report submitted successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error submitting report');
+        });
+    }
+}
+
+// Initialize filters from URL parameters
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const year = urlParams.get('year');
+    const status = urlParams.get('status');
+    const search = urlParams.get('search');
+    
+    if (year) document.getElementById('yearFilter').value = year;
+    if (status) document.getElementById('statusFilter').value = status;
+    if (search) document.getElementById('searchReport').value = search;
+});
+</script>
+{% endblock %}

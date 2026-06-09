@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h4><i class="fas fa-bullseye"></i> Manage All Goals</h4>
+        </div>
+        <div class="card-body">
+            <a href="{{ url_for('quarterly.admin_create_goal') }}" class="btn btn-success mb-3">
+                <i class="fas fa-plus"></i> Create Goal For Any User
+            </a>
+            
+            <form method="POST" action="{{ url_for('quarterly.admin_bulk_approve_goals') }}" id="bulkApproveForm">
+                <button type="button" class="btn btn-warning mb-3" onclick="bulkApprove()">
+                    <i class="fas fa-check-double"></i> Bulk Approve Selected
+                </button>
+            
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th><input type="checkbox" id="selectAll"></th>
+                                <th>ID</th>
+                                <th>Officer</th>
+                                <th>Year</th>
+                                <th>Quarter</th>
+                                <th>Goal</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for goal in goals %}
+                            <tr>
+                                <td><input type="checkbox" name="goal_ids" value="{{ goal.id }}" class="goal-checkbox"></td>
+                                <td>{{ goal.id }}</td>
+                                <td>{{ goal.user.username }}</td>
+                                <td>{{ goal.planning_year }}</td>
+                                <td>Q{{ goal.quarter }}</td>
+                                <td>{{ goal.goal_description[:50] }}...</td>
+                                <td>
+                                    <span class="badge bg-{% if goal.plan_status == 'APPROVED' %}success{% elif goal.plan_status == 'SUBMITTED' %}warning{% else %}secondary{% endif %}">
+                                        {{ goal.plan_status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('quarterly.admin_edit_goal', goal_id=goal.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="{{ url_for('quarterly.admin_delete_goal_adv', goal_id=goal.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this goal?')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('selectAll').addEventListener('change', function() {
+        var checkboxes = document.querySelectorAll('.goal-checkbox');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+    
+    function bulkApprove() {
+        var checked = document.querySelectorAll('.goal-checkbox:checked').length;
+        if(checked > 0 && confirm('Approve ' + checked + ' selected goals?')) {
+            document.getElementById('bulkApproveForm').submit();
+        } else if(checked === 0) {
+            alert('Please select at least one goal to approve');
+        }
+    }
+</script>
+{% endblock %}

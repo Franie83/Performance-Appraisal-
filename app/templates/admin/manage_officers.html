@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .status-active { background: #28a745; color: white; }
+    .status-inactive { background: #dc3545; color: white; }
+    
+    .filter-section {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .table-actions {
+        white-space: nowrap;
+    }
+    
+    .btn-group-sm .btn {
+        margin: 0 2px;
+    }
+    
+    .admin-badge {
+        background-color: #dc3545;
+        color: white;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 10px;
+        margin-left: 8px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    
+    .officer-card {
+        transition: transform 0.2s;
+    }
+    
+    .officer-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .top-actions {
+        margin-bottom: 20px;
+    }
+    .top-actions .btn {
+        margin-right: 10px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-id-card"></i> Manage Officer Profiles</h4>
+                    <small>Admin Control - Full access to all officer profiles and their reports</small>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Top Action Buttons - Added Manage Officer Profiles and Manage Reports -->
+                    <div class="top-actions">
+                        <a href="{{ url_for('admin.manage_officers') }}" class="btn btn-primary">
+                            <i class="fas fa-id-card"></i> Manage Officer Profiles
+                        </a>
+                        <a href="{{ url_for('admin.manage_reports') }}" class="btn btn-info">
+                            <i class="fas fa-file-alt"></i> Manage Reports
+                        </a>
+                        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-success">
+                            <i class="fas fa-users"></i> Manage Users
+                        </a>
+                    </div>
+                    
+                    <!-- Filter and Action Section -->
+                    <div class="filter-section">
+                        <div class="row align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label">Search</label>
+                                <input type="text" id="searchInput" class="form-control" placeholder="Name, staff number, ministry...">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Filter by Ministry</label>
+                                <select id="ministryFilter" class="form-select">
+                                    <option value="">All Ministries</option>
+                                    {% set ministries = officers|map(attribute='ministry')|select|unique|list %}
+                                    {% for ministry in ministries %}
+                                    <option value="{{ ministry }}">{{ ministry }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Filter by Department</label>
+                                <select id="departmentFilter" class="form-select">
+                                    <option value="">All Departments</option>
+                                    {% set departments = officers|map(attribute='department')|select|unique|list %}
+                                    {% for department in departments %}
+                                    <option value="{{ department }}">{{ department }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-secondary w-100" onclick="window.location.href='{{ url_for('admin.manage_users') }}'">
+                                    <i class="fas fa-users"></i> Manage Users
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Officers Table -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead class="table-success">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Staff Number</th>
+                                    <th>Full Name</th>
+                                    <th>Ministry (MDA)</th>
+                                    <th>Department</th>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="officersTableBody">
+                                {% for officer in officers %}
+                                <tr>
+                                    <td>{{ officer.id }}</a>
+                                    <td>
+                                        {% if officer.user %}
+                                            {{ officer.user.username }}
+                                            <br>
+                                            <small class="text-muted">{{ officer.user.role }}</small>
+                                        {% else %}
+                                            <span class="text-danger">N/A<br><small>No user</small></span>
+                                        {% endif %}
+                                    </a>
+                                    <td>{{ officer.staff_no or '-' }}</a>
+                                    <td>
+                                        <strong>{{ officer.full_name }}</strong><br>
+                                        <small class="text-muted">DOB: {{ officer.date_of_birth.strftime('%d/%m/%Y') if officer.date_of_birth else 'Not set' }}</small>
+                                    </a>
+                                    <td>{{ officer.ministry or 'Not set' }}</a>
+                                    <td>{{ officer.department or 'Not set' }}</a>
+                                    <td>{{ officer.title or 'Mr' }}</a>
+                                    <td>
+                                        {% if officer.user and officer.user.is_active %}
+                                            <span class="status-badge status-active">Active</span>
+                                        {% else %}
+                                            <span class="status-badge status-inactive">Inactive</span>
+                                        {% endif %}
+                                    </a>
+                                    <td class="table-actions">
+                                        <div class="action-buttons">
+                                            <!-- Edit Officer Profile Button -->
+                                            <a href="{{ url_for('admin.edit_officer_profile', officer_id=officer.id) }}" 
+                                               class="btn btn-info btn-sm" title="Edit Officer Profile">
+                                                <i class="fas fa-user-edit"></i> Edit Profile
+                                            </a>
+                                            
+                                            <!-- View User Reports Button -->
+                                            {% if officer.user %}
+                                            <a href="{{ url_for('admin.manage_reports', user_id=officer.user.id) }}" 
+                                               class="btn btn-primary btn-sm" title="View Officer's Reports">
+                                                <i class="fas fa-file-alt"></i> View Reports
+                                            </a>
+                                            {% endif %}
+                                            
+                                            <!-- Edit User Account Button -->
+                                            {% if officer.user %}
+                                            <a href="{{ url_for('admin.edit_user_page', user_id=officer.user.id) }}" 
+                                               class="btn btn-warning btn-sm" title="Edit User Account">
+                                                <i class="fas fa-user-cog"></i> Edit Account
+                                            </a>
+                                            {% endif %}
+                                            
+                                            <!-- Create Report for Officer Button -->
+                                            {% if officer.user %}
+                                            <a href="{{ url_for('reports.create_report_for_user', user_id=officer.user.id) }}" 
+                                               class="btn btn-success btn-sm" title="Create Report for Officer">
+                                                <i class="fas fa-plus-circle"></i> Create Report
+                                            </a>
+                                            {% endif %}
+                                            
+                                            <!-- Delete Officer Button -->
+                                            <button class="btn btn-danger btn-sm" onclick="deleteOfficer({{ officer.id }})" title="Delete Officer">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                    </a>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {% if not officers %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle"></i> No officer profiles found.
+                        <a href="{{ url_for('admin.manage_users') }}" class="alert-link">Create users to generate officer profiles</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Search and Filter Functions
+function filterTable() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const ministryFilter = document.getElementById('ministryFilter').value;
+    const departmentFilter = document.getElementById('departmentFilter').value;
+    
+    const rows = document.querySelectorAll('#officersTableBody tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const fullName = row.cells[3]?.innerText.toLowerCase() || '';
+        const username = row.cells[1]?.innerText.toLowerCase() || '';
+        const staffNo = row.cells[2]?.innerText.toLowerCase() || '';
+        const ministry = row.cells[4]?.innerText || '';
+        const department = row.cells[5]?.innerText || '';
+        
+        let matchesSearch = true;
+        if (searchTerm) {
+            matchesSearch = fullName.includes(searchTerm) || 
+                           username.includes(searchTerm) || 
+                           staffNo.includes(searchTerm) ||
+                           ministry.toLowerCase().includes(searchTerm) ||
+                           department.toLowerCase().includes(searchTerm);
+        }
+        
+        let matchesMinistry = true;
+        if (ministryFilter) {
+            matchesMinistry = ministry === ministryFilter;
+        }
+        
+        let matchesDepartment = true;
+        if (departmentFilter) {
+            matchesDepartment = department === departmentFilter;
+        }
+        
+        if (matchesSearch && matchesMinistry && matchesDepartment) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Delete Officer Function
+function deleteOfficer(officerId) {
+    if (confirm("Are you sure you want to delete this officer profile? This action cannot be undone.")) {
+        fetch("/admin/delete-officer/" + officerId, {
+            method: "DELETE",
+            headers: {"Content-Type": "application/json"}
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Officer profile deleted successfully");
+                location.reload();
+            } else {
+                alert("Error: " + (data.message || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting officer profile: ' + error.message);
+        });
+    }
+}
+
+// Event listeners for filters
+document.getElementById('searchInput')?.addEventListener('keyup', filterTable);
+document.getElementById('ministryFilter')?.addEventListener('change', filterTable);
+document.getElementById('departmentFilter')?.addEventListener('change', filterTable);
+
+// Initialize filter on page load
+document.addEventListener('DOMContentLoaded', function() {
+    filterTable();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Performance Report - Gen 79A</h4>
+                    <div>
+                        <a href="{{ url_for('reports.export_pdf', report_id=report.id) }}" class="btn btn-danger btn-sm">
+                            <i class="fas fa-file-pdf"></i> Download PDF
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Staff Information -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="text-primary">Staff Information</h5>
+                            <hr>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Full Name:</strong> {{ report.staff.full_name or report.staff.username }}</p>
+                            <p><strong>Staff Number:</strong> {{ report.staff.staff_no or 'N/A' }}</p>
+                            <p><strong>Ministry:</strong> {{ report.staff.ministry or 'N/A' }}</p>
+                            <p><strong>Department:</strong> {{ report.staff.department or 'N/A' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Role:</strong> {{ report.staff.role }}</p>
+                            <p><strong>Email:</strong> {{ report.staff.email }}</p>
+                            <p><strong>Verification Code:</strong> <code>{{ report.verification_code or 'Not generated' }}</code></p>
+                        </div>
+                    </div>
+
+                    <!-- Report Details -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="text-primary">Report Details</h5>
+                            <hr>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Report Year:</strong> {{ report.report_year }}</p>
+                            <p><strong>Period:</strong> {{ report.period_from.strftime('%B %d, %Y') if report.period_from else 'N/A' }} to {{ report.period_to.strftime('%B %d, %Y') if report.period_to else 'N/A' }}</p>
+                            <p><strong>Created:</strong> {{ report.created_at.strftime('%Y-%m-%d %H:%M:%S') if report.created_at else 'N/A' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong> 
+                                <span class="badge bg-{% if report.status == 'DRAFT' %}secondary{% elif report.status == 'SUBMITTED' %}primary{% elif report.status == 'REVIEWED' %}info{% elif report.status == 'FINALIZED' %}success{% elif report.status == 'REJECTED' %}danger{% else %}secondary{% endif %}">
+                                    {{ report.status }}
+                                </span>
+                            </p>
+                            <p><strong>Workflow Status:</strong>
+                                <span class="badge bg-{% if report.final_status == 'PENDING_REPORTING' %}warning{% elif report.final_status == 'PENDING_COUNTERSIGNING' %}info{% elif report.final_status == 'FINALIZED' %}success{% elif report.final_status == 'REJECTED' %}danger{% else %}secondary{% endif %}">
+                                    {{ report.final_status or 'PENDING_REPORTING' }}
+                                </span>
+                            </p>
+                            {% if report.submitted_at %}
+                            <p><strong>Submitted:</strong> {{ report.submitted_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Officer Assignments -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="text-primary">Officer Assignments</h5>
+                            <hr>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Reporting Officer:</strong> 
+                                {% if report.target_reporting_officer %}
+                                    {{ report.target_reporting_officer.full_name or report.target_reporting_officer.username }}
+                                {% else %}
+                                    Not assigned
+                                {% endif %}
+                            </p>
+                            {% if report.target_reporting_officer %}
+                            <p><strong>Reporting Officer Department:</strong> {{ report.target_reporting_officer.department or 'N/A' }}</p>
+                            {% endif %}
+                            <p><strong>Reporting Officer Comments:</strong> {{ report.reporting_comments or 'No comments' }}</p>
+                            <p><strong>Reporting Officer Approval:</strong> 
+                                {% if report.reporting_approved_at %}
+                                    {{ report.reporting_approved_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                                {% else %}
+                                    Pending
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Countersigning Officer:</strong> 
+                                {% if report.target_countersigning_officer %}
+                                    {{ report.target_countersigning_officer.full_name or report.target_countersigning_officer.username }}
+                                {% else %}
+                                    Not assigned
+                                {% endif %}
+                            </p>
+                            {% if report.target_countersigning_officer %}
+                            <p><strong>Countersigning Officer Ministry:</strong> {{ report.target_countersigning_officer.ministry or 'N/A' }}</p>
+                            {% endif %}
+                            <p><strong>Countersigning Officer Comments:</strong> {{ report.countersigning_comments or 'No comments' }}</p>
+                            <p><strong>Countersigning Officer Approval:</strong> 
+                                {% if report.countersigning_approved_at %}
+                                    {{ report.countersigning_approved_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                                {% else %}
+                                    Pending
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Workflow Timeline -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="text-primary">Workflow Timeline</h5>
+                            <hr>
+                            <div class="timeline">
+                                <!-- Report Creation -->
+                                <div class="mb-3">
+                                    <i class="fas fa-file-alt text-primary"></i>
+                                    <strong>Report Created:</strong> 
+                                    {{ report.created_at.strftime("%Y-%m-%d %H:%M:%S") if report.created_at else "N/A" }}
+                                    <br><small class="text-muted">by {{ report.staff.full_name if report.staff else "Officer" }}</small>
+                                </div>
+                                
+                                <!-- Submission -->
+                                {% if report.submitted_at %}
+                                <div class="mb-3">
+                                    <i class="fas fa-paper-plane text-primary"></i>
+                                    <strong>Submitted:</strong> 
+                                    {{ report.submitted_at.strftime("%Y-%m-%d %H:%M:%S") }}
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Reporting Officer Approval -->
+                                {% if report.reporting_approved_at %}
+                                <div class="mb-3 text-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    <strong>Reporting Officer Approved:</strong><br>
+                                    <i class="fas fa-user-check"></i> By: {{ report.target_reporting_officer.username if report.target_reporting_officer else "Unknown" }}<br>
+                                    <i class="fas fa-calendar"></i> Date: {{ report.reporting_approved_at.strftime("%Y-%m-%d %H:%M:%S") }}
+                                    {% if report.reporting_comments %}
+                                    <br><i class="fas fa-comment"></i> Comments: {{ report.reporting_comments }}
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Countersigning Officer Approval -->
+                                {% if report.countersigning_approved_at %}
+                                <div class="mb-3 text-success">
+                                    <i class="fas fa-check-double"></i>
+                                    <strong>Countersigning Officer Approved:</strong><br>
+                                    <i class="fas fa-user-check"></i> By: {{ report.target_countersigning_officer.username if report.target_countersigning_officer else "Unknown" }}<br>
+                                    <i class="fas fa-calendar"></i> Date: {{ report.countersigning_approved_at.strftime("%Y-%m-%d %H:%M:%S") }}
+                                    {% if report.countersigning_comments %}
+                                    <br><i class="fas fa-comment"></i> Comments: {{ report.countersigning_comments }}
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4(A): Division Targets -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="text-primary">4(A) Division/Branch/Section/Unit Targets</h5>
+                            <hr>
+                            <div class="border p-3 bg-light">
+                                {{ report.division_targets|default('Not specified')|safe }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4(B): Appraiser Targets -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="text-primary">4(B) Appraiser Targets</h5>
+                            <hr>
+                            <div class="border p-3 bg-light">
+                                {{ report.appraiser_targets|default('Not specified')|safe }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5(a): Main Duties -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="text-primary">5(a) Main Duties Performed</h5>
+                            <hr>
+                            <div class="border p-3 bg-light">
+                                {{ report.main_duties|default('Not specified')|safe }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5(c): Constraints/Difficulties -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="text-primary">5(c) Constraints/Difficulties Encountered</h5>
+                            <hr>
+                            <div class="border p-3 bg-light">
+                                {{ report.constraints_difficulties|default('None')|safe }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('reports.export_pdf', report_id=report.id) }}" class="btn btn-danger">
+                            <i class="fas fa-file-pdf"></i> Download PDF Report
+                        </a>
+                        <a href="{{ url_for('reports.my_reports') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to My Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .score-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .score-label {
+        font-weight: bold;
+        color: #00633E;
+    }
+    .score-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #008751;
+    }
+    .rating-badge {
+        font-size: 18px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        display: inline-block;
+    }
+    .rating-excellent { background: #28a745; color: white; }
+    .rating-good { background: #17a2b8; color: white; }
+    .rating-satisfactory { background: #ffc107; color: #000; }
+    .rating-needs-improvement { background: #fd7e14; color: white; }
+    .rating-poor { background: #dc3545; color: white; }
+    .officer-response-box {
+        background-color: #e8f5e9;
+        border-left: 4px solid #28a745;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    .reporting-officer-box {
+        background-color: #cfe2ff;
+        border-left: 4px solid #0d6efd;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-tie"></i> Countersigning Officer / Permanent Secretary Review</h4>
+                    <small>Yearly Appraisal for {{ appraisal.user.full_name or appraisal.user.username }} - {{ appraisal.appraisal_year }}</small>
+                </div>
+                <div class="card-body">
+
+                    <!-- Officer's Response -->
+                    {% if appraisal.officer_comments or appraisal.officer_agrees is not none %}
+                    <div class="officer-response-box">
+                        <h5><i class="fas fa-comment"></i> Officer's Response</h5>
+                        <p><strong>Agrees with assessment:</strong> 
+                            {% if appraisal.officer_agrees %}
+                                <span class="badge bg-success">Yes</span>
+                            {% else %}
+                                <span class="badge bg-danger">No</span>
+                            {% endif %}
+                        </p>
+                        {% if appraisal.officer_comments %}
+                        <p><strong>Comments:</strong> {{ appraisal.officer_comments }}</p>
+                        {% endif %}
+                        {% if not appraisal.officer_agrees and appraisal.officer_disagreement_reason %}
+                        <p><strong>Disagreement Reason:</strong> {{ appraisal.officer_disagreement_reason }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Reporting Officer's Comments -->
+                    {% if appraisal.reporting_officer_comments %}
+                    <div class="reporting-officer-box">
+                        <h5><i class="fas fa-user-check"></i> Reporting Officer's Comments</h5>
+                        <p class="mb-0">{{ appraisal.reporting_officer_comments }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Scores Display -->
+                    <div class="score-card">
+                        <h5>Current Appraisal Scores</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="score-label">Section A Score</div>
+                                <div class="score-value">{{ section_a_total }}/20</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="score-label">Section B Score</div>
+                                <div class="score-value">{{ section_b_total }}/40</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="score-label">Total Score</div>
+                                <div class="score-value">{{ total_score }}/60</div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="score-label">Rating</div>
+                                <div>
+                                    <span class="rating-badge rating-{{ rating|lower|replace(' ', '-') }}">{{ rating }} ({{ total_score }}/60)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Re-evaluation Form -->
+                    <form method="POST">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="re_evaluate" id="reEvaluate" value="yes">
+                                    <label class="form-check-label fw-bold" for="reEvaluate">
+                                        Re-evaluate Section B Scores (Adjust ratings below)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="card-body" id="reEvaluationSection" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <label>Diligently Executed Duties (1-5)</label>
+                                        <input type="number" name="diligently_executed" class="form-control" value="{{ appraisal.diligently_executed or 3 }}" min="1" max="5">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label>Delivered on Timelines (1-5)</label>
+                                        <input type="number" name="delivered_timelines" class="form-control" value="{{ appraisal.delivered_timelines or 3 }}" min="1" max="5">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label>Punctuality & Effectiveness (1-5)</label>
+                                        <input type="number" name="punctuality_effectiveness" class="form-control" value="{{ appraisal.punctuality_effectiveness or 3 }}" min="1" max="5">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label>Decency & Presentability (1-5)</label>
+                                        <input type="number" name="decency_presentability" class="form-control" value="{{ appraisal.decency_presentability or 3 }}" min="1" max="5">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label>Productivity (1-5)</label>
+                                        <input type="number" name="productivity" class="form-control" value="{{ appraisal.productivity or 3 }}" min="1" max="5">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label>Communication Skills (1-5)</label>
+                                        <input type="number" name="communication_skills" class="form-control" value="{{ appraisal.communication_skills or 3 }}" min="1" max="5">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label>Team Collaboration (1-5)</label>
+                                        <input type="number" name="team_collaboration" class="form-control" value="{{ appraisal.team_collaboration or 3 }}" min="1" max="5">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label>Independent Work (1-5)</label>
+                                        <input type="number" name="independent_work" class="form-control" value="{{ appraisal.independent_work or 3 }}" min="1" max="5">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label>Openness to Learning (1-5)</label>
+                                        <input type="number" name="openness_to_learning" class="form-control" value="{{ appraisal.openness_to_learning or 3 }}" min="1" max="5">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label>Proactivity & Initiative (1-5)</label>
+                                        <input type="number" name="proactivity_initiative" class="form-control" value="{{ appraisal.proactivity_initiative or 3 }}" min="1" max="5">
+                                    </div>
+                                </div>
+                                <div class="alert alert-warning mt-2">
+                                    <i class="fas fa-info-circle"></i> Re-evaluating will recalculate the Section B total score and overall rating.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label>Your Comments (optional)</label>
+                            <textarea name="ps_comments" class="form-control" rows="3" placeholder="Add your comments or observations...">{{ appraisal.ps_comments or '' }}</textarea>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" name="action" value="approve" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle"></i> Approve & Finalize
+                            </button>
+                            <button type="submit" name="action" value="return" class="btn btn-warning btn-lg" onclick="return confirm('Are you sure you want to return this appraisal to the Reporting Officer?')">
+                                <i class="fas fa-undo"></i> Return to Reporting Officer
+                            </button>
+                            <a href="{{ url_for('quarterly.dashboard') }}" class="btn btn-secondary btn-lg">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show/hide re-evaluation section
+    const reEvaluateCheckbox = document.getElementById('reEvaluate');
+    const reEvaluationSection = document.getElementById('reEvaluationSection');
+    
+    if (reEvaluateCheckbox) {
+        reEvaluateCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                reEvaluationSection.style.display = 'block';
+            } else {
+                reEvaluationSection.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

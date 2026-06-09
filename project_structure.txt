@@ -1,0 +1,220 @@
+Folder PATH listing
+Volume serial number is 187E-49FC
+C:.
+|   .env
+|   45
+|   60
+|   75
+|   project_structure.txt
+|   __init__.py.bak
+|   {
+|   
++---app
+|   |   extensions.py
+|   |   __init__.py
+|   |   
+|   +---admin
+|   |   |   routes.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---__pycache__
+|   |           routes.cpython-310.pyc
+|   |           __init__.cpython-310.pyc
+|   |           
+|   +---api
+|   |       routes.py
+|   |       __init__.py
+|   |       
+|   +---assessments
+|   |   |   assess.html
+|   |   |   forms.py
+|   |   |   pending.html
+|   |   |   routes.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---__pycache__
+|   |           routes.cpython-310.pyc
+|   |           __init__.cpython-310.pyc
+|   |           
+|   +---auth
+|   |   |   forms.py
+|   |   |   init.py
+|   |   |   routes.py
+|   |   |   services.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---__pycache__
+|   |           forms.cpython-310.pyc
+|   |           routes.cpython-310.pyc
+|   |           __init__.cpython-310.pyc
+|   |           
+|   +---countersign
+|   |       forms.py
+|   |       routes.py
+|   |       __init__.py
+|   |       
+|   +---hr
+|   |       routes.py
+|   |       __init__.py
+|   |       
+|   +---models
+|   |   |   assessment.py
+|   |   |   attachment.py
+|   |   |   audit_log.py
+|   |   |   countersignature.py
+|   |   |   init.py
+|   |   |   officer.py
+|   |   |   officer_declaration.py
+|   |   |   performance_report.py
+|   |   |   quarterly_plan.py
+|   |   |   supervision.py
+|   |   |   system_settings.py
+|   |   |   user.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---__pycache__
+|   |           assessment.cpython-310.pyc
+|   |           audit_log.cpython-310.pyc
+|   |           officer.cpython-310.pyc
+|   |           performance_report.cpython-310.pyc
+|   |           quarterly_plan.cpython-310.pyc
+|   |           system_settings.cpython-310.pyc
+|   |           user.cpython-310.pyc
+|   |           __init__.cpython-310.pyc
+|   |           
+|   +---officers
+|   |   |   forms.py
+|   |   |   routes.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---__pycache__
+|   |           routes.cpython-310.pyc
+|   |           __init__.cpython-310.pyc
+|   |           
+|   +---quarterly
+|   |   |   routes.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---__pycache__
+|   |           routes.cpython-310.pyc
+|   |           __init__.cpython-310.pyc
+|   |           
+|   +---reports
+|   |   |   forms.py
+|   |   |   init.py
+|   |   |   routes.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---__pycache__
+|   |           routes.cpython-310.pyc
+|   |           __init__.cpython-310.pyc
+|   |           
+|   +---services
+|   |       email_service.py
+|   |       notification_service.py
+|   |       pdf_service.py
+|   |       report_service.py
+|   |       score_service.py
+|   |       
+|   +---static
+|   |   +---css
+|   |   +---images
+|   |   +---js
+|   |   \---uploads
+|   |           background_logo_20260607_075149_Edo_state_logo.jpg
+|   |           
+|   +---templates
+|   |   |   404.html
+|   |   |   500.html
+|   |   |   assess.html
+|   |   |   base.html
+|   |   |   dashboard.html
+|   |   |   login.html
+|   |   |   New shortcut.lnk
+|   |   |   pending.html
+|   |   |   
+|   |   +---admin
+|   |   |       bulk_upload.html
+|   |   |       edit_officer_profile.html
+|   |   |       edit_report.html
+|   |   |       manage_officers.html
+|   |   |       manage_reports.html
+|   |   |       manage_users.html
+|   |   |       test.html
+|   |   |       
+|   |   +---assessments
+|   |   |       assess.html
+|   |   |       pending.html
+|   |   |       
+|   |   +---auth
+|   |   |       login.html
+|   |   |       
+|   |   +---officers
+|   |   |       profile.html
+|   |   |       
+|   |   +---quarterly
+|   |   |       admin_audit_trail.html
+|   |   |       admin_create_appraisal.html
+|   |   |       admin_create_goal.html
+|   |   |       admin_create_user.html
+|   |   |       admin_edit_goal.html
+|   |   |       admin_edit_user.html
+|   |   |       admin_manage_appraisals.html
+|   |   |       admin_manage_goals.html
+|   |   |       admin_manage_reviews.html
+|   |   |       admin_manage_users.html
+|   |   |       admin_system_stats.html
+|   |   |       approve_goal.html
+|   |   |       approve_goal_cs.html
+|   |   |       dashboard.html
+|   |   |       edit_goal.html
+|   |   |       plan_goal.html
+|   |   |       ps_review.html
+|   |   |       quarterly_review.html
+|   |   |       quarter_summary.html
+|   |   |       respond_appraisal.html
+|   |   |       review_quarterly.html
+|   |   |       review_quarterly_cs.html
+|   |   |       ro_yearly_appraisal.html
+|   |   |       view_reviews.html
+|   |   |       view_review_detail.html
+|   |   |       yearly_appraisal.html
+|   |   |       
+|   |   \---reports
+|   |           create.html
+|   |           my_reports.html
+|   |           view.html
+|   |           
+|   +---utils
+|   |   |   audit_logger.py
+|   |   |   decorators.py
+|   |   |   helpers.py
+|   |   |   pdf_generator.py
+|   |   |   pdf_quarterly.py
+|   |   |   permissions.py
+|   |   |   unified_audit_logger.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---__pycache__
+|   |           audit_logger.cpython-310.pyc
+|   |           pdf_generator.cpython-310.pyc
+|   |           pdf_quarterly.cpython-310.pyc
+|   |           unified_audit_logger.cpython-310.pyc
+|   |           __init__.cpython-310.pyc
+|   |           
+|   +---workflow
+|   |       routes.py
+|   |       __init__.py
+|   |       
+|   \---__pycache__
+|           extensions.cpython-310.pyc
+|           __init__.cpython-310.pyc
+|           
++---docs
++---instance
+|       appraisal.db
+|       
++---tests
+\---__pycache__
+        config.cpython-310.pyc
+        

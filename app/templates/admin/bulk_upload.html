@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Upload Users{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Bulk Upload Users</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>Instructions:</h5>
+                        <ol>
+                            <li>Download the CSV template below</li>
+                            <li>Fill in user details following the template format</li>
+                            <li>Upload the completed CSV file</li>
+                        </ol>
+                        <p><strong>Required fields:</strong> username, email, password, role</p>
+                        <p><strong>Valid roles:</strong> OFFICER, REPORTING_OFFICER, COUNTERSIGNING_OFFICER, HR, ADMIN</p>
+                        <p><strong>Note:</strong> Department is required for REPORTING_OFFICER, Ministry is required for COUNTERSIGNING_OFFICER</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <a href="{{ url_for('admin.download_user_template') }}" class="btn btn-success">
+                            <i class="fas fa-download"></i> Download CSV Template
+                        </a>
+                    </div>
+                    
+                    <form id="bulkUploadForm" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="csv_file" class="form-label">Select CSV File</label>
+                            <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="skip_existing" name="skip_existing" value="true">
+                            <label class="form-check-label" for="skip_existing">
+                                Skip existing users (don't overwrite)
+                            </label>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="submitBulkUpload()">
+                            <i class="fas fa-upload"></i> Upload Users
+                        </button>
+                        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                    
+                    <div id="uploadResults" style="display:none;" class="mt-4">
+                        <h4>Upload Results</h4>
+                        <div id="resultsContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function submitBulkUpload() {
+    const fileInput = document.getElementById('csv_file');
+    const skipExisting = document.getElementById('skip_existing').checked;
+    
+    if (!fileInput.files.length) {
+        alert('Please select a CSV file');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('csv_file', fileInput.files[0]);
+    formData.append('skip_existing', skipExisting);
+    
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+    btn.disabled = true;
+    
+    fetch('/admin/bulk-upload-users', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        const resultsDiv = document.getElementById('uploadResults');
+        const resultsContent = document.getElementById('resultsContent');
+        
+        if (data.success) {
+            let html = `<div class="alert alert-success">${data.message}</div>`;
+            
+            if (data.created_users && data.created_users.length) {
+                html += `<div class="alert alert-info">
+                    <strong>Created Users:</strong><br>
+                    ${data.created_users.join(', ')}
+                </div>`;
+            }
+            
+            if (data.skipped_users && data.skipped_users.length) {
+                html += `<div class="alert alert-warning">
+                    <strong>Skipped Users:</strong><br>
+                    ${data.skipped_users.join(', ')}
+                </div>`;
+            }
+            
+            if (data.errors && data.errors.length) {
+                html += `<div class="alert alert-danger">
+                    <strong>Errors:</strong><br>
+                    ${data.errors.join('<br>')}
+                </div>`;
+            }
+            
+            resultsContent.innerHTML = html;
+            resultsDiv.style.display = 'block';
+            
+            // Reload after 3 seconds if successful
+            if (data.created_users.length > 0) {
+                setTimeout(() => {
+                    window.location.href = '/admin/manage-users';
+                }, 3000);
+            }
+        } else {
+            resultsContent.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+            resultsDiv.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred during upload');
+    })
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
+</script>
+{% endblock %}

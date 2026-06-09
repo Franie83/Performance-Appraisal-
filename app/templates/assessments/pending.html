@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header {% if user_role == 'REPORTING_OFFICER' %}bg-warning{% elif user_role == 'COUNTERSIGNING_OFFICER' %}bg-success{% else %}bg-primary{% endif %} text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-clipboard-list"></i> 
+                        {% if user_role == 'REPORTING_OFFICER' %}
+                            Pending Assessments (Reporting Officer)
+                        {% elif user_role == 'COUNTERSIGNING_OFFICER' %}
+                            Pending Countersignatures
+                        {% else %}
+                            Pending Assessments
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if reports %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> 
+                            You have {{ reports|length }} report(s) waiting for your 
+                            {% if user_role == 'REPORTING_OFFICER' %}assessment{% else %}countersignature{% endif %}.
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Officer Name</th>
+                                        <th>Staff Number</th>
+                                        <th>Report Year</th>
+                                        <th>Period</th>
+                                        <th>Submitted Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for report in reports %}
+                                    <tr>
+                                        <td>{{ report.id }}</td>
+                                        <td>{{ report.staff.full_name or report.staff.username }}</td>
+                                        <td>{{ report.staff.staff_no or 'N/A' }}</td>
+                                        <td>{{ report.report_year }}</td>
+                                        <td>{{ report.period_from.strftime('%b %d, %Y') if report.period_from }} - {{ report.period_to.strftime('%b %d, %Y') if report.period_to }}</td>
+                                        <td>{{ report.submitted_at.strftime('%Y-%m-%d %H:%M') if report.submitted_at else 'N/A' }}</td>
+                                        <td>
+                                            <a href="{{ url_for('assessments.assess_report', report_id=report.id) }}" class="btn btn-{% if user_role == 'REPORTING_OFFICER' %}warning{% else %}success{% endif %} btn-sm">
+                                                <i class="fas fa-{% if user_role == 'REPORTING_OFFICER' %}check-circle{% else %}signature{% endif %}"></i> 
+                                                {% if user_role == 'REPORTING_OFFICER' %}Assess{% else %}Countersign{% endif %}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle fa-2x"></i>
+                            <p class="mt-2">
+                                {% if user_role == 'REPORTING_OFFICER' %}
+                                    No pending reports to assess.
+                                {% elif user_role == 'COUNTERSIGNING_OFFICER' %}
+                                    No pending reports to countersign.
+                                {% else %}
+                                    No pending assessments.
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

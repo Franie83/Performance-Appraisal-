@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h4><i class="fas fa-plus-circle"></i> Create Goal For Any User</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label>Select Officer *</label>
+                            <select name="user_id" class="form-select" required>
+                                <option value="">-- Select Officer --</option>
+                                {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>Planning Year *</label>
+                            <input type="number" name="planning_year" class="form-control" value="2026" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Quarter *</label>
+                            <select name="quarter" class="form-select" required>
+                                <option value="1">Quarter 1 (Jan-Mar)</option>
+                                <option value="2">Quarter 2 (Apr-Jun)</option>
+                                <option value="3">Quarter 3 (Jul-Sep)</option>
+                                <option value="4">Quarter 4 (Oct-Dec)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>Goal Description *</label>
+                            <textarea name="goal_description" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label>Priority (1-5)</label>
+                            <input type="number" name="priority" class="form-control" value="3" min="1" max="5">
+                        </div>
+                        <div class="mb-3">
+                            <label>Success Criteria</label>
+                            <textarea name="success_criteria" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" name="auto_approve" value="yes" class="form-check-input" id="autoApprove">
+                                <label class="form-check-label" for="autoApprove">
+                                    Auto-approve this goal (skip approval workflow)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success">Create Goal</button>
+                            <a href="{{ url_for('quarterly.admin_manage_goals') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

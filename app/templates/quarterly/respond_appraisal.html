@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h4>Respond to Appraisal</h4>
+                    <p class="mb-0">Year: {{ appraisal.appraisal_year }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Reporting Officer's Assessment:</strong>
+                        <p>{{ appraisal.reporting_officer_comments or 'No comments provided' }}</p>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-light">Section A Score (Training/Clock-in/Peer)</div>
+                                <div class="card-body text-center">
+                                    <h3>{{ section_a_total }}/20</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-light">Section B Score (Performance Indicators)</div>
+                                <div class="card-body text-center">
+                                    <h3>{{ section_b_total }}/40</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mb-4">
+                        <h4>Total Score: {{ total_score }}/60</h4>
+                        <h5>Rating: <span class="badge bg-success">{{ rating }}</span></h5>
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="form-group mb-3">
+                            <label>Your Comments (optional)</label>
+                            <textarea name="officer_comments" class="form-control" rows="3" placeholder="Add any comments about this assessment..."></textarea>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label class="fw-bold">Do you agree with this assessment?</label>
+                            <div class="mt-2">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="action" id="accept" value="accept" required>
+                                    <label class="form-check-label" for="accept">
+                                        <span class="text-success fw-bold">Yes, I agree</span>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="action" id="disagree" value="disagree" required>
+                                    <label class="form-check-label" for="disagree">
+                                        <span class="text-danger fw-bold">No, I disagree</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3" id="disagreement_reason_group" style="display:none;">
+                            <label class="text-danger fw-bold">Reason for Disagreement *</label>
+                            <textarea name="disagreement_reason" class="form-control" rows="3" placeholder="Please explain why you disagree with this assessment..."></textarea>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" name="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i> Submit Response
+                            </button>
+                            <a href="{{ url_for('quarterly.dashboard') }}" class="btn btn-secondary btn-lg">Cancel</a>
+                        </div>
+                    </form>
+                    
+                    <div class="alert alert-secondary mt-4">
+                        <small>
+                            <strong>Next Steps:</strong><br>
+                            - If you agree, this appraisal will be sent to the Countersigning Officer for final review<br>
+                            - If you disagree, the Reporting Officer will review your reasons and may adjust the assessment
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show/hide disagreement reason when radio buttons change
+    const acceptRadio = document.getElementById('accept');
+    const disagreeRadio = document.getElementById('disagree');
+    const reasonGroup = document.getElementById('disagreement_reason_group');
+    
+    function toggleReasonGroup() {
+        if (disagreeRadio.checked) {
+            reasonGroup.style.display = 'block';
+        } else {
+            reasonGroup.style.display = 'none';
+        }
+    }
+    
+    if (acceptRadio && disagreeRadio) {
+        acceptRadio.addEventListener('change', toggleReasonGroup);
+        disagreeRadio.addEventListener('change', toggleReasonGroup);
+    }
+</script>
+{% endblock %}

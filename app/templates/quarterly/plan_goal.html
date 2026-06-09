@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4><i class="fas fa-bullseye"></i> Plan Quarterly Goal</h4>
+                    <small>Set SMART goals for the upcoming quarter</small>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Planning Year</label>
+                                <select name="planning_year" class="form-select" required>
+                                    <option value="{{ current_year }}">{{ current_year }}</option>
+                                    <option value="{{ current_year + 1 }}">{{ current_year + 1 }}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Quarter</label>
+                                <select name="quarter" class="form-select" required>
+                                    <option value="1">Quarter 1 (January - March)</option>
+                                    <option value="2">Quarter 2 (April - June)</option>
+                                    <option value="3">Quarter 3 (July - September)</option>
+                                    <option value="4">Quarter 4 (October - December)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Goal Description *</label>
+                            <textarea name="goal_description" class="form-control" rows="4" required 
+                                placeholder="Describe your goal for this quarter. Ensure it is SMART (Specific, Measurable, Achievable, Relevant, Time-bound)"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Priority Level</label>
+                                <select name="priority" class="form-select">
+                                    <option value="1">1 - Highest Priority</option>
+                                    <option value="2">2 - High Priority</option>
+                                    <option value="3" selected>3 - Medium Priority</option>
+                                    <option value="4">4 - Low Priority</option>
+                                    <option value="5">5 - Lowest Priority</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Success Criteria</label>
+                            <textarea name="success_criteria" class="form-control" rows="3" 
+                                placeholder="How will you measure success? What are the key performance indicators?"></textarea>
+                        </div>
+                        
+                        <!-- Permanent SMART Goal Tips - Always Visible -->
+                        <div class="alert alert-info mt-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-lightbulb fa-2x me-2 text-warning"></i>
+                                <strong class="fs-5">SMART Goal Tips:</strong>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <strong class="text-success">S</strong> - <strong>Specific</strong>
+                                        <div class="small text-muted">Clearly define what you want to achieve</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong class="text-success">M</strong> - <strong>Measurable</strong>
+                                        <div class="small text-muted">Include metrics to track progress</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong class="text-success">A</strong> - <strong>Achievable</strong>
+                                        <div class="small text-muted">Ensure it's realistic and attainable</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <strong class="text-success">R</strong> - <strong>Relevant</strong>
+                                        <div class="small text-muted">Align with departmental/MDA goals</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong class="text-success">T</strong> - <strong>Time-bound</strong>
+                                        <div class="small text-muted">Set clear deadlines and milestones</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2 p-2 bg-light rounded">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <strong>Example SMART Goal:</strong>
+                                <div class="small mt-1">"Complete the annual budget report by March 31st, with 100% accuracy, using the new financial software, after completing required training."</div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="fas fa-save"></i> Save Goal
+                            </button>
+                            <a href="{{ url_for('quarterly.dashboard') }}" class="btn btn-secondary px-4">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

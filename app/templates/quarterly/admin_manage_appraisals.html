@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h4><i class="fas fa-star"></i> Manage All Yearly Appraisals</h4>
+        </div>
+        <div class="card-body">
+            <a href="{{ url_for('quarterly.admin_create_appraisal') }}" class="btn btn-success mb-3">
+                <i class="fas fa-plus"></i> Create Appraisal For Any User
+            </a>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Officer</th>
+                            <th>Year</th>
+                            <th>Status</th>
+                            <th>Total Score</th>
+                            <th>Rating</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appraisal in appraisals %}
+                        <tr>
+                            <td>{{ appraisal.id }}</td>
+                            <td>{{ appraisal.user.username }}</td>
+                            <td>{{ appraisal.appraisal_year }}</td>
+                            <td>
+                                <span class="badge bg-{% if appraisal.status == 'FINALIZED' %}success{% elif appraisal.status == 'SUBMITTED' %}warning{% elif appraisal.status == 'PS_REVIEW' %}primary{% else %}secondary{% endif %}">
+                                    {{ appraisal.status }}
+                                </span>
+                            </td>
+                            <td>{{ appraisal.total_score or 0 }}/80</td>
+                            <td>{{ appraisal.rating or 'Not Rated' }}</td>
+                            <td>
+                                <a href="{{ url_for('quarterly.admin_delete_appraisal_adv', appraisal_id=appraisal.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this appraisal?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

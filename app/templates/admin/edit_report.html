@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4><i class="fas fa-edit"></i> Admin Edit Report - Full Control</h4>
+                        <small>Editing Report #{{ report.id }} for Officer: {{ report.staff.full_name if report.staff else 'N/A' }}</small>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('reports.dashboard') }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-home"></i> Go to Home
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <ul class="nav nav-tabs" id="reportTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">Basic Info</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="content-tab" data-bs-toggle="tab" data-bs-target="#content" type="button" role="tab">Report Content</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="workflow-tab" data-bs-toggle="tab" data-bs-target="#workflow" type="button" role="tab">Workflow Status</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="assessment-tab" data-bs-toggle="tab" data-bs-target="#assessment" type="button" role="tab">Assessment/Grades</button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content mt-3">
+                            <!-- Basic Info Tab -->
+                            <div class="tab-pane fade show active" id="basic" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Officer</label>
+                                        <input type="text" class="form-control" value="{{ report.staff.full_name if report.staff else 'N/A' }}" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Staff Number</label>
+                                        <input type="text" class="form-control" value="{{ report.staff.staff_no if report.staff else 'N/A' }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Report Year *</label>
+                                        <input type="number" name="report_year" class="form-control" value="{{ report.report_year }}" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Period From *</label>
+                                        <input type="date" name="period_from" class="form-control" value="{{ report.period_from.strftime('%Y-%m-%d') if report.period_from else '' }}" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Period To *</label>
+                                        <input type="date" name="period_to" class="form-control" value="{{ report.period_to.strftime('%Y-%m-%d') if report.period_to else '' }}" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Verification Code</label>
+                                        <input type="text" class="form-control" value="{{ report.verification_code or 'Not generated' }}" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">QR Code</label>
+                                        {% if report.qr_code %}
+                                            <img src="data:image/png;base64,{{ report.qr_code }}" style="max-width: 100px;">
+                                        {% else %}
+                                            <span class="text-muted">Not generated</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Report Content Tab -->
+                            <div class="tab-pane fade" id="content" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">Division/Branch/Section/Unit Targets</label>
+                                        <textarea name="division_targets" class="form-control" rows="4">{{ report.division_targets or '' }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">Appraiser Targets</label>
+                                        <textarea name="appraiser_targets" class="form-control" rows="4">{{ report.appraiser_targets or '' }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">Main Duties</label>
+                                        <textarea name="main_duties" class="form-control" rows="4">{{ report.main_duties or '' }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">Constraints/Difficulties</label>
+                                        <textarea name="constraints_difficulties" class="form-control" rows="3">{{ report.constraints_difficulties or '' }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Workflow Status Tab -->
+                            <div class="tab-pane fade" id="workflow" role="tabpanel">
+                                <!-- Officer Assignment Section -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0"><i class="fas fa-user-check"></i> Assign Reporting & Countersigning Officers</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Reporting Officer *</label>
+                                                <select name="target_reporting_officer_id" class="form-select" required>
+                                                    <option value="">-- Select Reporting Officer --</option>
+                                                    {% for user in users %}
+                                                        {% if user.role == 'REPORTING_OFFICER' or user.role == 'ADMIN' %}
+                                                        <option value="{{ user.id }}" {% if report.target_reporting_officer_id == user.id %}selected{% endif %}>
+                                                            {{ user.full_name or user.username }} ({{ user.role }})
+                                                        </option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                                <small class="text-muted">The officer who will assess this report</small>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Countersigning Officer *</label>
+                                                <select name="target_countersigning_officer_id" class="form-select" required>
+                                                    <option value="">-- Select Countersigning Officer --</option>
+                                                    {% for user in users %}
+                                                        {% if user.role == 'COUNTERSIGNING_OFFICER' or user.role == 'ADMIN' %}
+                                                        <option value="{{ user.id }}" {% if report.target_countersigning_officer_id == user.id %}selected{% endif %}>
+                                                            {{ user.full_name or user.username }} ({{ user.role }})
+                                                        </option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                                <small class="text-muted">The officer who will countersign this report</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Status Section -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-warning">
+                                        <h6 class="mb-0"><i class="fas fa-chart-line"></i> Workflow Status</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Report Status</label>
+                                                <select name="status" class="form-control">
+                                                    <option value="DRAFT" {% if report.status == 'DRAFT' %}selected{% endif %}>DRAFT</option>
+                                                    <option value="SUBMITTED" {% if report.status == 'SUBMITTED' %}selected{% endif %}>SUBMITTED</option>
+                                                    <option value="REVIEWED" {% if report.status == 'REVIEWED' %}selected{% endif %}>REVIEWED</option>
+                                                    <option value="FINALIZED" {% if report.status == 'FINALIZED' %}selected{% endif %}>FINALIZED</option>
+                                                    <option value="REJECTED" {% if report.status == 'REJECTED' %}selected{% endif %}>REJECTED</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Workflow Final Status</label>
+                                                <select name="final_status" class="form-control">
+                                                    <option value="PENDING_REPORTING" {% if report.final_status == 'PENDING_REPORTING' %}selected{% endif %}>PENDING_REPORTING</option>
+                                                    <option value="PENDING_COUNTERSIGNING" {% if report.final_status == 'PENDING_COUNTERSIGNING' %}selected{% endif %}>PENDING_COUNTERSIGNING</option>
+                                                    <option value="FINALIZED" {% if report.final_status == 'FINALIZED' %}selected{% endif %}>FINALIZED</option>
+                                                    <option value="REJECTED" {% if report.final_status == 'REJECTED' %}selected{% endif %}>REJECTED</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Approval Dates Section -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0"><i class="fas fa-calendar-check"></i> Approval Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Reporting Officer Approval Date/Time</label>
+                                                <input type="text" name="reporting_approved_at" class="form-control" value="{{ report.reporting_approved_at.strftime('%Y-%m-%d %H:%M:%S') if report.reporting_approved_at else '' }}" placeholder="YYYY-MM-DD HH:MM:SS">
+                                                <small class="text-muted">Format: 2024-01-15 14:30:00</small>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Countersigning Officer Approval Date/Time</label>
+                                                <input type="text" name="countersigning_approved_at" class="form-control" value="{{ report.countersigning_approved_at.strftime('%Y-%m-%d %H:%M:%S') if report.countersigning_approved_at else '' }}" placeholder="YYYY-MM-DD HH:MM:SS">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label">Reporting Officer Comments</label>
+                                                <textarea name="reporting_comments" class="form-control" rows="2">{{ report.reporting_comments or '' }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label">Countersigning Officer Comments</label>
+                                                <textarea name="countersigning_comments" class="form-control" rows="2">{{ report.countersigning_comments or '' }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label">Rejection Reason</label>
+                                                <textarea name="rejection_reason" class="form-control" rows="2">{{ report.rejection_reason or '' }}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Assessment Tab -->
+                            <div class="tab-pane fade" id="assessment" role="tabpanel">
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" id="hasAssessment" name="has_assessment" {% if assessment %}checked{% endif %}>
+                                    <label class="form-check-label" for="hasAssessment">Has Assessment/Grades</label>
+                                </div>
+                                
+                                <div id="assessmentFields" {% if not assessment %}style="display: none;"{% endif %}>
+                                    <h5>Performance Grading (A=6, B=5, C=4, D=3, E=2, F=1)</h5>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">(i) Foresight</label>
+                                            <select name="foresight" class="form-control">
+                                                <option value="">Select Grade</option>
+                                                {% for grade in ['A','B','C','D','E','F'] %}
+                                                <option value="{{ grade }}" {% if assessment and assessment.foresight == grade %}selected{% endif %}>{{ grade }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">(ii) Judgement</label>
+                                            <select name="judgement" class="form-control">
+                                                <option value="">Select Grade</option>
+                                                {% for grade in ['A','B','C','D','E','F'] %}
+                                                <option value="{{ grade }}" {% if assessment and assessment.judgement == grade %}selected{% endif %}>{{ grade }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">(iii) Oral Expression</label>
+                                            <select name="oral_expression" class="form-control">
+                                                <option value="">Select Grade</option>
+                                                {% for grade in ['A','B','C','D','E','F'] %}
+                                                <option value="{{ grade }}" {% if assessment and assessment.oral_expression == grade %}selected{% endif %}>{{ grade }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">(iv) Relations with Colleagues</label>
+                                            <select name="relations" class="form-control">
+                                                <option value="">Select Grade</option>
+                                                {% for grade in ['A','B','C','D','E','F'] %}
+                                                <option value="{{ grade }}" {% if assessment and assessment.relations == grade %}selected{% endif %}>{{ grade }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">(v) Punctuality</label>
+                                            <select name="punctuality" class="form-control">
+                                                <option value="">Select Grade</option>
+                                                {% for grade in ['A','B','C','D','E','F'] %}
+                                                <option value="{{ grade }}" {% if assessment and assessment.punctuality == grade %}selected{% endif %}>{{ grade }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">(vi) Attendance at Work</label>
+                                            <select name="attendance" class="form-control">
+                                                <option value="">Select Grade</option>
+                                                {% for grade in ['A','B','C','D','E','F'] %}
+                                                <option value="{{ grade }}" {% if assessment and assessment.attendance == grade %}selected{% endif %}>{{ grade }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">(vii) Industry</label>
+                                            <select name="industry" class="form-control">
+                                                <option value="">Select Grade</option>
+                                                {% for grade in ['A','B','C','D','E','F'] %}
+                                                <option value="{{ grade }}" {% if assessment and assessment.industry == grade %}selected{% endif %}>{{ grade }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">(viii) Output of Work</label>
+                                            <select name="output_work" class="form-control">
+                                                <option value="">Select Grade</option>
+                                                {% for grade in ['A','B','C','D','E','F'] %}
+                                                <option value="{{ grade }}" {% if assessment and assessment.output_work == grade %}selected{% endif %}>{{ grade }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">General Remarks</label>
+                                            <textarea name="general_remarks" class="form-control" rows="3">{{ assessment.general_remarks if assessment else '' }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">Training Recommended</label>
+                                            <textarea name="training_recommended" class="form-control" rows="2">{{ assessment.training_recommended if assessment else '' }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Promotability Rating</label>
+                                            <select name="promotability_rating" class="form-control">
+                                                <option value="">Select Rating</option>
+                                                {% for grade in ['A','B','C','D','E','F'] %}
+                                                <option value="{{ grade }}" {% if assessment and assessment.promotability_rating == grade %}selected{% endif %}>{{ grade }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Admin Override Warning:</strong> Changes made here override normal workflow. Use with caution!
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a href="{{ url_for('admin.manage_reports') }}" class="btn btn-secondary">Back to Reports List</a>
+                            <a href="{{ url_for('reports.view_report', report_id=report.id) }}" class="btn btn-info" target="_blank">View Report</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('hasAssessment').addEventListener('change', function() {
+    const assessmentFields = document.getElementById('assessmentFields');
+    if(this.checked) {
+        assessmentFields.style.display = 'block';
+    } else {
+        assessmentFields.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

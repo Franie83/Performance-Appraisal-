@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="fas fa-star"></i> Assess Performance Report</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Officer:</strong> {{ report.officer.full_name if report.officer else 'N/A' }}<br>
+                        <strong>Staff Number:</strong> {{ report.officer.staff_no if report.officer else 'N/A' }}<br>
+                        <strong>Report Period:</strong> {{ report.period_from.strftime('%Y-%m-%d') if report.period_from else 'N/A' }} to {{ report.period_to.strftime('%Y-%m-%d') if report.period_to else 'N/A' }} ({{ report.report_year }})<br>
+                        <strong>Department:</strong> {{ report.officer.department if report.officer else 'N/A' }}
+                    </div>
+                    
+                    <form method="POST">
+                        <h5 class="mt-4">Section 6: Performance Grading</h5>
+                        <p class="text-muted"><small>Grade A (Outstanding - 6 points), B (Very Good - 5 points), C (Good - 4 points), D (Fair - 3 points), E (Poor - 2 points), F (Very Poor - 1 point)</small></p>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">(i) Foresight</label>
+                                <select name="foresight" class="form-control" required>
+                                    <option value="">Select Grade</option>
+                                    {% for grade in ['A','B','C','D','E','F'] %}
+                                    <option value="{{ grade }}" {% if assessment and assessment.foresight == grade %}selected{% endif %}>{{ grade }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">(ii) Judgement</label>
+                                <select name="judgement" class="form-control" required>
+                                    <option value="">Select Grade</option>
+                                    {% for grade in ['A','B','C','D','E','F'] %}
+                                    <option value="{{ grade }}" {% if assessment and assessment.judgement == grade %}selected{% endif %}>{{ grade }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">(iii) Oral Expression</label>
+                                <select name="oral_expression" class="form-control" required>
+                                    <option value="">Select Grade</option>
+                                    {% for grade in ['A','B','C','D','E','F'] %}
+                                    <option value="{{ grade }}" {% if assessment and assessment.oral_expression == grade %}selected{% endif %}>{{ grade }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">(iv) Relations with Colleagues</label>
+                                <select name="relations" class="form-control" required>
+                                    <option value="">Select Grade</option>
+                                    {% for grade in ['A','B','C','D','E','F'] %}
+                                    <option value="{{ grade }}" {% if assessment and assessment.relations == grade %}selected{% endif %}>{{ grade }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">(v) Punctuality</label>
+                                <select name="punctuality" class="form-control" required>
+                                    <option value="">Select Grade</option>
+                                    {% for grade in ['A','B','C','D','E','F'] %}
+                                    <option value="{{ grade }}" {% if assessment and assessment.punctuality == grade %}selected{% endif %}>{{ grade }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">(vi) Attendance at Work</label>
+                                <select name="attendance" class="form-control" required>
+                                    <option value="">Select Grade</option>
+                                    {% for grade in ['A','B','C','D','E','F'] %}
+                                    <option value="{{ grade }}" {% if assessment and assessment.attendance == grade %}selected{% endif %}>{{ grade }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">(vii) Industry</label>
+                                <select name="industry" class="form-control" required>
+                                    <option value="">Select Grade</option>
+                                    {% for grade in ['A','B','C','D','E','F'] %}
+                                    <option value="{{ grade }}" {% if assessment and assessment.industry == grade %}selected{% endif %}>{{ grade }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">(viii) Output of Work</label>
+                                <select name="output_work" class="form-control" required>
+                                    <option value="">Select Grade</option>
+                                    {% for grade in ['A','B','C','D','E','F'] %}
+                                    <option value="{{ grade }}" {% if assessment and assessment.output_work == grade %}selected{% endif %}>{{ grade }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">(ix) Quality of Work</label>
+                                <select name="quality_work" class="form-control" required>
+                                    <option value="">Select Grade</option>
+                                    {% for grade in ['A','B','C','D','E','F'] %}
+                                    <option value="{{ grade }}" {% if assessment and assessment.quality_work == grade %}selected{% endif %}>{{ grade }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">(x) Honesty</label>
+                                <select name="honesty" class="form-control" required>
+                                    <option value="">Select Grade</option>
+                                    {% for grade in ['A','B','C','D','E','F'] %}
+                                    <option value="{{ grade }}" {% if assessment and assessment.honesty == grade %}selected{% endif %}>{{ grade }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Section 7: General Remarks</label>
+                                <textarea name="general_remarks" class="form-control" rows="4" placeholder="Provide general remarks about the officer's performance...">{{ assessment.general_remarks if assessment else '' }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Section 8: Training Recommended</label>
+                                <textarea name="training_recommended" class="form-control" rows="3" placeholder="Recommend any training needed...">{{ assessment.training_recommended if assessment else '' }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Section 10: Promotability Rating</label>
+                                <select name="promotability_rating" class="form-control">
+                                    <option value="">Select Rating</option>
+                                    <option value="A" {% if assessment and assessment.promotability_rating == 'A' %}selected{% endif %}>A - Exceptionally well qualified for next higher post</option>
+                                    <option value="B" {% if assessment and assessment.promotability_rating == 'B' %}selected{% endif %}>B - Ready for promotion</option>
+                                    <option value="C" {% if assessment and assessment.promotability_rating == 'C' %}selected{% endif %}>C - Has promotion potential</option>
+                                    <option value="D" {% if assessment and assessment.promotability_rating == 'D' %}selected{% endif %}>D - Not yet entitled for promotion</option>
+                                    <option value="E" {% if assessment and assessment.promotability_rating == 'E' %}selected{% endif %}>E - No evidence of promotion potential</option>
+                                    <option value="F" {% if assessment and assessment.promotability_rating == 'F' %}selected{% endif %}>F - Unlikely to qualify further</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Submit Assessment
+                            </button>
+                            <a href="{{ url_for('assessments.pending_assessments') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

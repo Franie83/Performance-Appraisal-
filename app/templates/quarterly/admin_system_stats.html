@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .stat-card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        position: relative;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    .stat-icon {
+        font-size: 3.5rem;
+        position: absolute;
+        bottom: 15px;
+        right: 20px;
+        opacity: 0.8;
+    }
+    .stat-number {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+    }
+    .stat-subtitle {
+        font-size: 0.7rem;
+        opacity: 0.8;
+    }
+    
+    /* Card color schemes - vibrant backgrounds with dark text */
+    .card-purple {
+        background: linear-gradient(135deg, #e8eaf6 0%, #d1c4e9 100%);
+        border-left: 4px solid #5e35b1;
+    }
+    .card-purple .stat-number, .card-purple .stat-label { color: #311b92; }
+    .card-purple .stat-icon { color: #5e35b1; }
+    
+    .card-green {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-left: 4px solid #2e7d32;
+    }
+    .card-green .stat-number, .card-green .stat-label { color: #1b5e20; }
+    .card-green .stat-icon { color: #2e7d32; }
+    
+    .card-pink {
+        background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+        border-left: 4px solid #c2185b;
+    }
+    .card-pink .stat-number, .card-pink .stat-label { color: #880e4f; }
+    .card-pink .stat-icon { color: #c2185b; }
+    
+    .card-orange {
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        border-left: 4px solid #ef6c00;
+    }
+    .card-orange .stat-number, .card-orange .stat-label { color: #bf360c; }
+    .card-orange .stat-icon { color: #ef6c00; }
+    
+    .card-blue {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-left: 4px solid #1565c0;
+    }
+    .card-blue .stat-number, .card-blue .stat-label { color: #0d47a1; }
+    .card-blue .stat-icon { color: #1565c0; }
+    
+    .card-teal {
+        background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+        border-left: 4px solid #00695c;
+    }
+    .card-teal .stat-number, .card-teal .stat-label { color: #004d40; }
+    .card-teal .stat-icon { color: #00695c; }
+    
+    .card-amber {
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        border-left: 4px solid #ff8f00;
+    }
+    .card-amber .stat-number, .card-amber .stat-label { color: #e65100; }
+    .card-amber .stat-icon { color: #ff8f00; }
+    
+    .card-indigo {
+        background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+        border-left: 4px solid #3949ab;
+    }
+    .card-indigo .stat-number, .card-indigo .stat-label { color: #1a237e; }
+    .card-indigo .stat-icon { color: #3949ab; }
+    
+    .stats-header {
+        background: linear-gradient(135deg, #1a3a2a 0%, #008751 100%);
+        border-bottom: 3px solid #D4AF37;
+    }
+    
+    .progress-bar-custom {
+        background: linear-gradient(90deg, #008751, #00a86b);
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header stats-header text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-line me-2"></i> System Statistics Dashboard</h4>
+                    <small>Real-time performance monitoring</small>
+                </div>
+                <div class="card-body bg-light">
+                    <!-- Stats Row 1 -->
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3">
+                            <div class="card stat-card card-purple">
+                                <div class="card-body">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="stat-number">{{ stats.total_users }}</div>
+                                    <div class="stat-label">Total Users</div>
+                                    <div class="stat-subtitle">Active system users</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card stat-card card-green">
+                                <div class="card-body">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-bullseye"></i>
+                                    </div>
+                                    <div class="stat-number">{{ stats.total_goals }}</div>
+                                    <div class="stat-label">Total Goals</div>
+                                    <div class="stat-subtitle">Quarterly goals created</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card stat-card card-pink">
+                                <div class="card-body">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="stat-number">{{ stats.approved_goals }}</div>
+                                    <div class="stat-label">Approved Goals</div>
+                                    <div class="stat-subtitle">Goals fully approved</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Row 2 -->
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3">
+                            <div class="card stat-card card-orange">
+                                <div class="card-body">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="stat-number">{{ stats.pending_goals }}</div>
+                                    <div class="stat-label">Pending Goals</div>
+                                    <div class="stat-subtitle">Awaiting approval</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card stat-card card-blue">
+                                <div class="card-body">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </div>
+                                    <div class="stat-number">{{ stats.total_reviews }}</div>
+                                    <div class="stat-label">Total Reviews</div>
+                                    <div class="stat-subtitle">Quarterly reviews</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card stat-card card-teal">
+                                <div class="card-body">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="stat-number">{{ stats.completed_reviews }}</div>
+                                    <div class="stat-label">Completed Reviews</div>
+                                    <div class="stat-subtitle">Reviews finalized</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Row 3 -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card stat-card card-amber">
+                                <div class="card-body">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <div class="stat-number">{{ stats.total_appraisals }}</div>
+                                    <div class="stat-label">Total Yearly Appraisals</div>
+                                    <div class="stat-subtitle">Annual performance reviews</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card stat-card card-indigo">
+                                <div class="card-body">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-trophy"></i>
+                                    </div>
+                                    <div class="stat-number">{{ stats.finalized_appraisals }}</div>
+                                    <div class="stat-label">Finalized Appraisals</div>
+                                    <div class="stat-subtitle">Completed & signed off</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Overview -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm bg-white">
+                                <div class="card-body">
+                                    <h5 class="mb-3"><i class="fas fa-chart-pie me-2 text-success"></i> Approval Progress</h5>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>Goal Approval Rate</span>
+                                            <span class="fw-bold text-success">
+                                                {% if stats.total_goals > 0 %}
+                                                    {{ (stats.approved_goals / stats.total_goals * 100)|round(1) }}%
+                                                {% else %}
+                                                    0%
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar progress-bar-custom" style="width: {% if stats.total_goals > 0 %}{{ (stats.approved_goals / stats.total_goals * 100)|round(1) }}{% else %}0{% endif %}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>Review Completion Rate</span>
+                                            <span class="fw-bold text-info">
+                                                {% if stats.total_reviews > 0 %}
+                                                    {{ (stats.completed_reviews / stats.total_reviews * 100)|round(1) }}%
+                                                {% else %}
+                                                    0%
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar bg-info" style="width: {% if stats.total_reviews > 0 %}{{ (stats.completed_reviews / stats.total_reviews * 100)|round(1) }}{% else %}0{% endif %}%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>Appraisal Finalization Rate</span>
+                                            <span class="fw-bold text-primary">
+                                                {% if stats.total_appraisals > 0 %}
+                                                    {{ (stats.finalized_appraisals / stats.total_appraisals * 100)|round(1) }}%
+                                                {% else %}
+                                                    0%
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar bg-primary" style="width: {% if stats.total_appraisals > 0 %}{{ (stats.finalized_appraisals / stats.total_appraisals * 100)|round(1) }}{% else %}0{% endif %}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('quarterly.dashboard') }}" class="btn btn-success btn-lg px-5">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

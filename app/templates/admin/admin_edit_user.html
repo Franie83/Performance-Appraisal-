@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #00633E 0%, #008751 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px 10px 0 0;
+        margin-bottom: 0;
+    }
+    
+    .form-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .form-body {
+        padding: 30px;
+        background: white;
+    }
+    
+    .required-field::after {
+        content: " *";
+        color: red;
+        font-weight: bold;
+    }
+    
+    .btn-submit {
+        background-color: #008751;
+        border-color: #008751;
+        padding: 10px 30px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    
+    .btn-submit:hover {
+        background-color: #00633E;
+        border-color: #00633E;
+    }
+    
+    .btn-cancel {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        padding: 10px 30px;
+        font-size: 16px;
+    }
+    
+    .alert-fixed {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    .info-box {
+        background-color: #e8f5e9;
+        border-left: 4px solid #008751;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="form-container">
+        <div class="form-card">
+            <div class="form-header">
+                <h3 class="mb-0"><i class="fas fa-user-edit"></i> Edit User</h3>
+                <p class="mb-0 mt-1">Update user information and permissions</p>
+            </div>
+            
+            <div class="form-body">
+                <div class="info-box">
+                    <i class="fas fa-info-circle text-success"></i>
+                    <strong>Editing user:</strong> {{ user.username }} ({{ user.role }})
+                    <br>
+                    <small>Leave password blank to keep current password</small>
+                </div>
+                
+                <form id="editUserForm" method="POST" action="{{ url_for('admin.update_user', user_id=user.id) }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label required-field">Username</label>
+                            <input type="text" id="username" name="username" class="form-control" value="{{ user.username }}" readonly>
+                            <small class="text-muted">Username cannot be changed</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label required-field">Email</label>
+                            <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">New Password</label>
+                            <input type="password" id="password" name="password" class="form-control">
+                            <small class="text-muted">Leave blank to keep current password</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" id="confirm_password" name="confirm_password" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label required-field">Role</label>
+                            <select id="role" name="role" class="form-select">
+                                <option value="OFFICER" {% if user.role == 'OFFICER' %}selected{% endif %}>Officer</option>
+                                <option value="REPORTING_OFFICER" {% if user.role == 'REPORTING_OFFICER' %}selected{% endif %}>Reporting Officer</option>
+                                <option value="COUNTERSIGNING_OFFICER" {% if user.role == 'COUNTERSIGNING_OFFICER' %}selected{% endif %}>Countersigning Officer</option>
+                                <option value="HR" {% if user.role == 'HR' %}selected{% endif %}>HR</option>
+                                <option value="ADMIN" {% if user.role == 'ADMIN' %}selected{% endif %}>Admin</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Staff Number</label>
+                            <input type="text" id="staff_no" name="staff_no" class="form-control" value="{{ user.staff_no or '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Surname</label>
+                            <input type="text" id="surname" name="surname" class="form-control" value="{{ user.surname or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">First Name</label>
+                            <input type="text" id="first_name" name="first_name" class="form-control" value="{{ user.first_name or '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Ministry / MDA</label>
+                            <input type="text" id="ministry" name="ministry" class="form-control" value="{{ user.ministry or '' }}" placeholder="e.g., Ministry of Finance">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Department</label>
+                            <input type="text" id="department" name="department" class="form-control" value="{{ user.department or '' }}" placeholder="e.g., ICT Department">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" id="is_active" name="is_active" class="form-check-input" {% if user.is_active %}checked{% endif %}>
+                        <label class="form-check-label">Active Account</label>
+                        <small class="text-muted d-block">Inactive users cannot log in</small>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12 text-end">
+                            <a href="{{ url_for('admin.manage_users') }}" class="btn btn-cancel me-2">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-submit" id="submitBtn">
+                                <i class="fas fa-save"></i> Update User
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Container -->
+<div id="alertContainer"></div>
+
+<script>
+document.getElementById('editUserForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get form values
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    const role = document.getElementById('role').value;
+    const isActive = document.getElementById('is_active').checked;
+    const surname = document.getElementById('surname').value;
+    const firstName = document.getElementById('first_name').value;
+    const staffNo = document.getElementById('staff_no').value;
+    const ministry = document.getElementById('ministry').value;
+    const department = document.getElementById('department').value;
+    
+    // Validation
+    if (!email) {
+        showAlert('Please enter an email address', 'danger');
+        document.getElementById('email').focus();
+        return;
+    }
+    
+    if (!email.includes('@') || !email.includes('.')) {
+        showAlert('Please enter a valid email address', 'danger');
+        document.getElementById('email').focus();
+        return;
+    }
+    
+    if (password && password !== confirmPassword) {
+        showAlert('Passwords do not match', 'danger');
+        document.getElementById('confirm_password').focus();
+        return;
+    }
+    
+    if (password && password.length < 6) {
+        showAlert('Password must be at least 6 characters long', 'danger');
+        document.getElementById('password').focus();
+        return;
+    }
+    
+    // Disable submit button
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating User...';
+    
+    // Prepare data
+    const userData = {
+        email: email,
+        role: role,
+        is_active: isActive,
+        password: password,
+        surname: surname,
+        first_name: firstName,
+        staff_no: staffNo,
+        ministry: ministry,
+        department: department
+    };
+    
+    // Send request
+    fetch('{{ url_for("admin.update_user", user_id=user.id) }}', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('User updated successfully! Redirecting...', 'success');
+            setTimeout(() => {
+                window.location.href = '{{ url_for("admin.manage_users") }}';
+            }, 1500);
+        } else {
+            showAlert(data.message || 'Error updating user', 'danger');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Update User';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred. Please try again.', 'danger');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Update User';
+    });
+});
+
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-fixed shadow`;
+    alertDiv.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+        ${message}
+        <button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    alertContainer.appendChild(alertDiv);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv && alertDiv.remove) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

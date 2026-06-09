@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .review-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-left: 4px solid #17a2b8;
+        transition: all 0.3s;
+    }
+    .review-section:hover {
+        transform: translateX(5px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .officer-report {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+    }
+    .previous-review {
+        background-color: #e8f5e9;
+        border-left: 4px solid #28a745;
+    }
+    .info-icon {
+        width: 30px;
+        text-align: center;
+    }
+    .btn-return {
+        background-color: #fd7e14;
+        border-color: #fd7e14;
+        color: white;
+    }
+    .btn-return:hover {
+        background-color: #e66a00;
+        border-color: #e66a00;
+        color: white;
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4><i class="fas fa-clipboard-check"></i> Review Quarterly Report</h4>
+                    <small>Officer: {{ goal.user.full_name or goal.user.username }} | Quarter {{ goal.quarter }} | {{ goal.planning_year }}</small>
+                </div>
+                <div class="card-body">
+                    <!-- Previous Review History (if any) -->
+                    {% if goal.reporting_officer_comments %}
+                    <div class="alert previous-review mb-4">
+                        <h6><i class="fas fa-history"></i> Previous Review (Already Completed)</h6>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong><i class="fas fa-trophy"></i> Officer's Achievements:</strong>
+                                <p class="small mt-1">{{ goal.achievements }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong><i class="fas fa-comment"></i> Previous Comments:</strong>
+                                <p class="small mt-1">{{ goal.reporting_officer_comments }}</p>
+                            </div>
+                        </div>
+                        {% if goal.further_directives %}
+                        <div class="mt-2">
+                            <strong><i class="fas fa-forward"></i> Previous Directives:</strong>
+                            <p class="small mt-1">{{ goal.further_directives }}</p>
+                        </div>
+                        {% endif %}
+                        <div class="alert alert-warning mt-2 mb-0">
+                            <i class="fas fa-edit"></i> <strong>Note:</strong> Submitting a new review will overwrite the previous review.
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Officer's Report Section -->
+                    <div class="card mb-4 officer-report">
+                        <div class="card-header bg-warning">
+                            <h6 class="mb-0"><i class="fas fa-user"></i> Officer's Performance Report</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <strong><i class="fas fa-bullseye text-success"></i> Goal:</strong>
+                                    <p class="border-bottom pb-2">{{ goal.goal_description }}</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <strong><i class="fas fa-trophy text-success"></i> Achievements:</strong>
+                                    <div class="border p-2 bg-white rounded mt-1">
+                                        {{ goal.achievements or 'Not reported' }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <strong><i class="fas fa-exclamation-triangle text-warning"></i> Challenges:</strong>
+                                    <div class="border p-2 bg-white rounded mt-1">
+                                        {{ goal.challenges or 'None reported' }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <strong><i class="fas fa-question-circle text-info"></i> Reasons for Failure/Success:</strong>
+                                    <div class="border p-2 bg-white rounded mt-1">
+                                        {{ goal.reasons_for_failure or 'Not specified' }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <strong><i class="fas fa-chart-line text-primary"></i> Recovery Plan:</strong>
+                                    <div class="border p-2 bg-white rounded mt-1">
+                                        {{ goal.recovery_plan or 'Not specified' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Review Form -->
+                    <form method="POST">
+                        <div class="review-section p-3 mb-3 rounded">
+                            <h6><i class="fas fa-star text-warning"></i> Reporting Officer's Assessment</h6>
+                            <hr>
+                            <div class="mb-3">
+                                <label class="form-label">Reviewer's Comments *</label>
+                                <textarea name="comments" class="form-control" rows="4" required 
+                                    placeholder="Provide detailed feedback on the officer's performance this quarter. Highlight strengths and areas for improvement.">{{ goal.reporting_officer_comments or '' }}</textarea>
+                                <small class="text-muted">Be specific and constructive in your feedback.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Further Directives</label>
+                                <textarea name="directives" class="form-control" rows="3" 
+                                    placeholder="Provide specific instructions or guidance for the officer to improve performance.">{{ goal.further_directives or '' }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Next Quarter Adjustments</label>
+                                <textarea name="adjustments" class="form-control" rows="3" 
+                                    placeholder="If applicable, suggest adjustments to goals or strategies for the next quarter.">{{ goal.quarter_2_adjustments or '' }}</textarea>
+                                <small class="text-muted">These adjustments will be shared with the officer for Q{{ goal.quarter + 1 if goal.quarter < 4 else '1 next year' }} planning.</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Rating Section (Optional) -->
+                        <div class="review-section p-3 mb-3 rounded">
+                            <h6><i class="fas fa-chart-simple"></i> Performance Rating (Optional)</h6>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Goal Achievement Rating</label>
+                                    <select name="achievement_rating" class="form-select">
+                                        <option value="">Select Rating</option>
+                                        <option value="5">5 - Exceeded Expectations</option>
+                                        <option value="4">4 - Met Expectations Fully</option>
+                                        <option value="3">3 - Partially Met Expectations</option>
+                                        <option value="2">2 - Below Expectations</option>
+                                        <option value="1">1 - Significantly Below Expectations</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Overall Quarter Rating</label>
+                                    <select name="overall_rating" class="form-select">
+                                        <option value="">Select Rating</option>
+                                        <option value="A">A - Outstanding</option>
+                                        <option value="B">B - Very Good</option>
+                                        <option value="C">C - Good</option>
+                                        <option value="D">D - Fair</option>
+                                        <option value="E">E - Poor</option>
+                                        <option value="F">F - Very Poor</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Review Guidelines:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Provide honest and constructive feedback</li>
+                                <li>Focus on specific behaviors and outcomes</li>
+                                <li>Acknowledge achievements and address challenges</li>
+                                <li>Provide actionable suggestions for improvement</li>
+                                <li>The officer will be able to view this review</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" name="action" value="approve" class="btn btn-primary px-5">
+                                <i class="fas fa-paper-plane"></i> Approve & Send to CS
+                            </button>
+                            <button type="submit" name="action" value="return" class="btn btn-return px-5" onclick="return confirm('Return this review to the officer for modification?')">
+                                <i class="fas fa-undo"></i> Return to Officer
+                            </button>
+                            <a href="{{ url_for('quarterly.dashboard') }}" class="btn btn-secondary px-4">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
